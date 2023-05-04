@@ -315,6 +315,9 @@ func (s *Example) UnmarshalBinary(b []byte) int {
 	s.Boolf = int(b[m]) & 1
 	m += 1
 	// Byte4f
+	if len(s.Byte4f) < int(4) {
+		s.Byte4f = make([]byte, int(4))
+	}
 	for i := 0; i < int(4); i++ {
 		s.Byte4f[i] = byte(b[m])
 		m += 1
@@ -388,6 +391,9 @@ func (s *Example) UnmarshalBinary(b []byte) int {
 	s.Size3 = int(b[m])
 	m += 1
 	// Bstr
+	if len(s.Bstr) < int(s.Size3) {
+		s.Bstr = make([]byte, int(s.Size3))
+	}
 	for i := 0; i < int(s.Size3); i++ {
 		s.Bstr[i] = byte(b[m])
 		m += 1
@@ -405,6 +411,9 @@ func (s *Example) UnmarshalBinary(b []byte) int {
 	s.Size5 = int(b[m])
 	m += 1
 	// Bstr2
+	if len(s.Bstr2) < int(s.Size5) {
+		s.Bstr2 = make([]byte, int(s.Size5))
+	}
 	for i := 0; i < int(s.Size5); i++ {
 		s.Bstr2[i] = byte(b[m])
 		m += 1
@@ -412,20 +421,32 @@ func (s *Example) UnmarshalBinary(b []byte) int {
 	// Nested
 	m += s.Nested.UnmarshalBinary(b[m:])
 	// NestedP
+	if s.NestedP == nil {
+		s.NestedP = new(Nested)
+	}
 	m += (*s.NestedP).UnmarshalBinary(b[m:])
 	// TestP64
+	if s.TestP64 == nil {
+		s.TestP64 = new(int)
+	}
 	(*s.TestP64) = int(int64(uint64(b[m+0])<<56 | uint64(b[m+1])<<48 | uint64(b[m+2])<<40 | uint64(b[m+3])<<32 | uint64(b[m+4])<<24 | uint64(b[m+5])<<16 | uint64(b[m+6])<<8 | uint64(b[m+7])<<0))
 	m += 8
 	// NestedSize
 	s.NestedSize = int(int32(uint32(b[m+0])<<24 | uint32(b[m+1])<<16 | uint32(b[m+2])<<8 | uint32(b[m+3])<<0))
 	m += 4
 	// NestedA
+	if len(s.NestedA) < int(s.NestedSize) {
+		s.NestedA = make([]Nested, int(s.NestedSize))
+	}
 	for i := 0; i < int(s.NestedSize); i++ {
 		m += s.NestedA[i].UnmarshalBinary(b[m:])
 	}
 	// CustomTypeSize
 	m += s.CustomTypeSize.UnmarshalBinary(b[m:])
 	// CustomTypeSizeArr
+	if len(s.CustomTypeSizeArr) < int(s.CustomTypeSize) {
+		s.CustomTypeSizeArr = make([]byte, int(s.CustomTypeSize))
+	}
 	for i := 0; i < int(s.CustomTypeSize); i++ {
 		s.CustomTypeSizeArr[i] = byte(b[m])
 		m += 1

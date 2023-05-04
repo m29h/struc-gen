@@ -87,15 +87,7 @@ func TestSizeOf(t *testing.T) {
 }
 func TestDecode(t *testing.T) {
 
-	out := &Example{
-		Byte4f:            make([]byte, 4),
-		Bstr:              make([]byte, 4),
-		Bstr2:             make([]byte, 4),
-		NestedP:           &Nested{},
-		TestP64:           new(int),
-		NestedA:           make([]Nested, 6),
-		CustomTypeSizeArr: make([]byte, 4),
-	}
+	out := &Example{}
 	if l := out.UnmarshalBinary(referenceBytes); l != len(referenceBytes) {
 		t.Fatalf("got different number of bytes as expected %d %d", l, len(referenceBytes))
 	}
@@ -117,8 +109,8 @@ func BenchmarkMarshal__strucgen(b *testing.B) {
 	}
 }
 func BenchmarkUnmarshal__strucgen(b *testing.B) {
+	a := &Example{}
 	for i := 0; i < b.N; i++ {
-		a := reference
 		a.UnmarshalBinary(referenceBytes)
 	}
 }
@@ -157,10 +149,9 @@ func BenchmarkMarshal__lunixbochs_struc(b *testing.B) {
 }
 
 func BenchmarkUnmarshal__lunixbochs_struc(b *testing.B) {
-
+	out := &Example{}
 	for it := 0; it < b.N; it++ {
 		buf := bytes.NewReader(referenceBytes)
-		out := &Example{}
 		if err := struc.Unpack(buf, out); err != nil {
 			b.Fatalf("%v,%s", out, err)
 		}

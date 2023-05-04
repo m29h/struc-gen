@@ -3,6 +3,8 @@ Struc-gen is a code generator for Go that generates methods for binary Marshalin
 
 This code is currently EXPERIMENTAL. The API may be changed at any time without notice. In favour of performance there is currently no error handling. The byte slice for marshaling must be pre-allocated to sufficient size. Also a sufficient binary slice with valid data must be provided for unmarshaling. If not, method will read out of bounds and panic(). Use with care.
 
+Slices and pointer receivers are automatically allocated if they are nil in UnmarshalBinary. Slices are resized when necessary in UnmarshalBinary
+
 ## Useage
 ```go
 // the go generate expression will run code generator for all structs in this file.
@@ -22,7 +24,7 @@ func main() {
 	t := &Example{B: []int64{1, 2, 30000, 4, 5, 6}}
 	buf := make([]byte, t.SizeOf())
 	t.MarshalBinary(buf)
-	o := &Example{B: make([]int64, t.A)}  
+	o := &Example{}  
 	o.UnmarshalBinary(buf)
 	fmt.Printf("t=%v,o=%v\n", t, o)
 	//t=&{6 [1 2 30000 4 5 6] 0 },o=&{6 [1 2 30000 4 5 6] 0 }

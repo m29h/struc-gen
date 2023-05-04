@@ -3,6 +3,7 @@ package structag
 import (
 	"fmt"
 	"go/types"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -46,10 +47,18 @@ func (tag *StrucTag) unroll(t types.Type, n *jen.Statement) (*jen.Statement, err
 		if err != nil {
 			return jen.Comment("Serialization Error"), err
 		}
-		return jen.For(lvar.Clone().Op(":=").Lit(0), lvar.Clone().Op("<").Add(lmax), lvar.Clone().Op("++")).Block(cast), nil
+		r := jen.Null()
+		if _, ok := t.(*types.Slice); tag.method == UnmarshalBinary && ok && true {
+			r.If(jen.Len(n.Clone()).Op("<").Add(lmax)).Block(n.Clone().Op("=").Make(jen.Id(strings.Replace(v.String(), "command-line-arguments.", "", 1)), lmax.Clone())).Line()
+		}
+		return r.For(lvar.Clone().Op(":=").Lit(0), lvar.Clone().Op("<").Add(lmax), lvar.Clone().Op("++")).Block(cast), nil
 
 	case *types.Pointer:
-		return tag.unroll(v.Elem(), jen.Parens(jen.Op("*").Add(n)))
+		r, err := tag.unroll(v.Elem(), jen.Parens(jen.Op("*").Add(n)))
+		if tag.method == UnmarshalBinary && true {
+			r = jen.If(n.Clone().Op("==").Nil()).Block(n.Clone().Op("=").New(jen.Id(strings.Replace(v.Elem().String(), "command-line-arguments.", "", 1)))).Line().Add(r)
+		}
+		return r, err
 
 	default:
 		return nil, fmt.Errorf("struct field type not handled: %T", v)
