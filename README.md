@@ -1,9 +1,19 @@
 # struc-gen
 Struc-gen is a code generator for Go that generates methods for binary Marshaling and Unmarshaling. The behaviour can be configured by adding struct tags. The configuration options are heavily inspired and substantially compatible with those used by [`lunixbochs/struc`](https://github.com/lunixbochs/struc)
 
-This code is currently EXPERIMENTAL. The API may be changed at any time without notice. In favour of performance there is currently no error handling. The byte slice for marshaling must be pre-allocated to sufficient size. Also a sufficient binary slice with valid data must be provided for unmarshaling. If not, method will read out of bounds and panic(). Use with care.
+This code is currently EXPERIMENTAL. The API may be changed at any time without notice. In favour of performance there is currently limited error handling. The byte slice for marshaling must be pre-allocated to sufficient size or else marshaling will panic(). Use the SizeOf() method to determine suitable byte slice size.
 
+Unmarshaling is terminating gracefully if the end of byte slice is reached prematurely. 
+Very basic validation can be achieved with e.g.:
+```go
+o := &Example{}  
+if actual := o.UnmarshalBinary(buf); actual != o.SizeOf(){
+	return nil, errors.New("Reached EOF while Unmarshaling")
+}
+return o, nil
+```
 Slices and pointer receivers are automatically allocated if they are nil in UnmarshalBinary. Slices are resized when necessary in UnmarshalBinary
+ 
 
 ## Useage
 ```go

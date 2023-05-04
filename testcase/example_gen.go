@@ -288,30 +288,57 @@ func (s *Example) UnmarshalBinary(b []byte) int {
 	// Pad
 	m += int(5)
 	// I8f
+	if m+1 > len(b) {
+		return m
+	}
 	s.I8f = int(int8(b[m]))
 	m += 1
 	// I16f
+	if m+2 > len(b) {
+		return m
+	}
 	s.I16f = int(int16(uint16(b[m+0])<<8 | uint16(b[m+1])<<0))
 	m += 2
 	// I32f
+	if m+4 > len(b) {
+		return m
+	}
 	s.I32f = int(int32(uint32(b[m+0])<<24 | uint32(b[m+1])<<16 | uint32(b[m+2])<<8 | uint32(b[m+3])<<0))
 	m += 4
 	// I64f
+	if m+8 > len(b) {
+		return m
+	}
 	s.I64f = int(int64(uint64(b[m+0])<<56 | uint64(b[m+1])<<48 | uint64(b[m+2])<<40 | uint64(b[m+3])<<32 | uint64(b[m+4])<<24 | uint64(b[m+5])<<16 | uint64(b[m+6])<<8 | uint64(b[m+7])<<0))
 	m += 8
 	// U8f
+	if m+1 > len(b) {
+		return m
+	}
 	s.U8f = int(b[m])
 	m += 1
 	// U16f
+	if m+2 > len(b) {
+		return m
+	}
 	s.U16f = int(uint16(b[m+0])<<0 | uint16(b[m+1])<<8)
 	m += 2
 	// U32f
+	if m+4 > len(b) {
+		return m
+	}
 	s.U32f = int(uint32(b[m+0])<<0 | uint32(b[m+1])<<8 | uint32(b[m+2])<<16 | uint32(b[m+3])<<24)
 	m += 4
 	// U64f
+	if m+8 > len(b) {
+		return m
+	}
 	s.U64f = int(uint64(b[m+0])<<0 | uint64(b[m+1])<<8 | uint64(b[m+2])<<16 | uint64(b[m+3])<<24 | uint64(b[m+4])<<32 | uint64(b[m+5])<<40 | uint64(b[m+6])<<48 | uint64(b[m+7])<<56)
 	m += 8
 	// Boolf
+	if m+1 > len(b) {
+		return m
+	}
 	s.Boolf = int(b[m]) & 1
 	m += 1
 	// Byte4f
@@ -319,75 +346,144 @@ func (s *Example) UnmarshalBinary(b []byte) int {
 		s.Byte4f = make([]byte, int(4))
 	}
 	for i := 0; i < int(4); i++ {
+		if m+1 > len(b) {
+			return m
+		}
 		s.Byte4f[i] = byte(b[m])
 		m += 1
 	}
 	// I8
+	if m+1 > len(b) {
+		return m
+	}
 	s.I8 = int8(int8(b[m]))
 	m += 1
 	// I16
+	if m+2 > len(b) {
+		return m
+	}
 	s.I16 = int16(int16(uint16(b[m+0])<<8 | uint16(b[m+1])<<0))
 	m += 2
 	// I32
+	if m+4 > len(b) {
+		return m
+	}
 	s.I32 = int32(int32(uint32(b[m+0])<<24 | uint32(b[m+1])<<16 | uint32(b[m+2])<<8 | uint32(b[m+3])<<0))
 	m += 4
 	// I64
+	if m+8 > len(b) {
+		return m
+	}
 	s.I64 = int64(int64(uint64(b[m+0])<<56 | uint64(b[m+1])<<48 | uint64(b[m+2])<<40 | uint64(b[m+3])<<32 | uint64(b[m+4])<<24 | uint64(b[m+5])<<16 | uint64(b[m+6])<<8 | uint64(b[m+7])<<0))
 	m += 8
 	// U8
+	if m+1 > len(b) {
+		return m
+	}
 	s.U8 = uint8(b[m])
 	m += 1
 	// U16
+	if m+2 > len(b) {
+		return m
+	}
 	s.U16 = uint16(uint16(b[m+0])<<0 | uint16(b[m+1])<<8)
 	m += 2
 	// U32
+	if m+4 > len(b) {
+		return m
+	}
 	s.U32 = uint32(uint32(b[m+0])<<0 | uint32(b[m+1])<<8 | uint32(b[m+2])<<16 | uint32(b[m+3])<<24)
 	m += 4
 	// U64
+	if m+8 > len(b) {
+		return m
+	}
 	s.U64 = uint64(uint64(b[m+0])<<0 | uint64(b[m+1])<<8 | uint64(b[m+2])<<16 | uint64(b[m+3])<<24 | uint64(b[m+4])<<32 | uint64(b[m+5])<<40 | uint64(b[m+6])<<48 | uint64(b[m+7])<<56)
 	m += 8
 	// BoolT
-	s.BoolT = b[m] > 0
+	if m+1 > len(b) {
+		return m
+	}
+	s.BoolT = uint8(b[m]) > 0
 	m += 1
 	// BoolF
-	s.BoolF = b[m] > 0
+	if m+1 > len(b) {
+		return m
+	}
+	s.BoolF = uint8(b[m]) > 0
 	m += 1
 	// Byte4
 	for i := 0; i < int(4); i++ {
+		if m+1 > len(b) {
+			return m
+		}
 		s.Byte4[i] = byte(b[m])
 		m += 1
 	}
 	// Float1
+	if m+4 > len(b) {
+		return m
+	}
 	s.Float1 = float32(math.Float32frombits(uint32(b[m+0])<<24 | uint32(b[m+1])<<16 | uint32(b[m+2])<<8 | uint32(b[m+3])<<0))
 	m += 4
 	// Float2
+	if m+8 > len(b) {
+		return m
+	}
 	s.Float2 = float64(math.Float64frombits(uint64(b[m+0])<<56 | uint64(b[m+1])<<48 | uint64(b[m+2])<<40 | uint64(b[m+3])<<32 | uint64(b[m+4])<<24 | uint64(b[m+5])<<16 | uint64(b[m+6])<<8 | uint64(b[m+7])<<0))
 	m += 8
 	// I32f2
+	if m+4 > len(b) {
+		return m
+	}
 	s.I32f2 = int64(int32(uint32(b[m+0])<<24 | uint32(b[m+1])<<16 | uint32(b[m+2])<<8 | uint32(b[m+3])<<0))
 	m += 4
 	// U32f2
+	if m+4 > len(b) {
+		return m
+	}
 	s.U32f2 = int64(uint32(b[m+0])<<24 | uint32(b[m+1])<<16 | uint32(b[m+2])<<8 | uint32(b[m+3])<<0)
 	m += 4
 	// I32f3
+	if m+8 > len(b) {
+		return m
+	}
 	s.I32f3 = int32(int64(uint64(b[m+0])<<56 | uint64(b[m+1])<<48 | uint64(b[m+2])<<40 | uint64(b[m+3])<<32 | uint64(b[m+4])<<24 | uint64(b[m+5])<<16 | uint64(b[m+6])<<8 | uint64(b[m+7])<<0))
 	m += 8
 	// Size1
+	if m+4 > len(b) {
+		return m
+	}
 	s.Size1 = int(int32(uint32(b[m+0])<<0 | uint32(b[m+1])<<8 | uint32(b[m+2])<<16 | uint32(b[m+3])<<24))
 	m += 4
 	// Str
+	if m+int(s.Size1) > len(b) {
+		return m
+	}
 	s.Str = string(b[m : m+int(s.Size1)])
 	m += int(s.Size1)
 	// Strb
+	if m+int(4) > len(b) {
+		return m
+	}
 	s.Strb = string(b[m : m+int(4)])
 	m += int(4)
 	// Size2
+	if m+1 > len(b) {
+		return m
+	}
 	s.Size2 = int(b[m])
 	m += 1
 	// Str2
+	if m+int(s.Size2) > len(b) {
+		return m
+	}
 	s.Str2 = string(b[m : m+int(s.Size2)])
 	m += int(s.Size2)
 	// Size3
+	if m+1 > len(b) {
+		return m
+	}
 	s.Size3 = int(b[m])
 	m += 1
 	// Bstr
@@ -395,19 +491,34 @@ func (s *Example) UnmarshalBinary(b []byte) int {
 		s.Bstr = make([]byte, int(s.Size3))
 	}
 	for i := 0; i < int(s.Size3); i++ {
+		if m+1 > len(b) {
+			return m
+		}
 		s.Bstr[i] = byte(b[m])
 		m += 1
 	}
 	// Size4
+	if m+4 > len(b) {
+		return m
+	}
 	s.Size4 = int(int32(uint32(b[m+0])<<0 | uint32(b[m+1])<<8 | uint32(b[m+2])<<16 | uint32(b[m+3])<<24))
 	m += 4
 	// Str4a
+	if m+int(s.Size4) > len(b) {
+		return m
+	}
 	s.Str4a = string(b[m : m+int(s.Size4)])
 	m += int(s.Size4)
 	// Str4b
+	if m+int(s.Size4) > len(b) {
+		return m
+	}
 	s.Str4b = string(b[m : m+int(s.Size4)])
 	m += int(s.Size4)
 	// Size5
+	if m+1 > len(b) {
+		return m
+	}
 	s.Size5 = int(b[m])
 	m += 1
 	// Bstr2
@@ -415,6 +526,9 @@ func (s *Example) UnmarshalBinary(b []byte) int {
 		s.Bstr2 = make([]byte, int(s.Size5))
 	}
 	for i := 0; i < int(s.Size5); i++ {
+		if m+1 > len(b) {
+			return m
+		}
 		s.Bstr2[i] = byte(b[m])
 		m += 1
 	}
@@ -429,9 +543,15 @@ func (s *Example) UnmarshalBinary(b []byte) int {
 	if s.TestP64 == nil {
 		s.TestP64 = new(int)
 	}
+	if m+8 > len(b) {
+		return m
+	}
 	(*s.TestP64) = int(int64(uint64(b[m+0])<<56 | uint64(b[m+1])<<48 | uint64(b[m+2])<<40 | uint64(b[m+3])<<32 | uint64(b[m+4])<<24 | uint64(b[m+5])<<16 | uint64(b[m+6])<<8 | uint64(b[m+7])<<0))
 	m += 8
 	// NestedSize
+	if m+4 > len(b) {
+		return m
+	}
 	s.NestedSize = int(int32(uint32(b[m+0])<<24 | uint32(b[m+1])<<16 | uint32(b[m+2])<<8 | uint32(b[m+3])<<0))
 	m += 4
 	// NestedA
@@ -448,6 +568,9 @@ func (s *Example) UnmarshalBinary(b []byte) int {
 		s.CustomTypeSizeArr = make([]byte, int(s.CustomTypeSize))
 	}
 	for i := 0; i < int(s.CustomTypeSize); i++ {
+		if m+1 > len(b) {
+			return m
+		}
 		s.CustomTypeSizeArr[i] = byte(b[m])
 		m += 1
 	}
@@ -535,6 +658,9 @@ func (s *Nested) MarshalBinary(b []byte) int {
 func (s *Nested) UnmarshalBinary(b []byte) int {
 	m := 0
 	// Test2
+	if m+1 > len(b) {
+		return m
+	}
 	s.Test2 = int(int8(b[m]))
 	m += 1
 	return m

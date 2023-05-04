@@ -20,34 +20,39 @@ func (tag *StrucTag) Unpack() (*jen.Statement, error) {
 
 }
 
+// Helper method generating a bounds check 'b[m]' for the wish of deserializing exactlen bytes
+// In the bounds check failure case a "return m" block is inserted
+
+func checkBound(exactlen *jen.Statement) *jen.Statement {
+	return jen.If(jen.Id("m").Op("+").Add(exactlen).Op(">").Len(jen.Id("b"))).Block(jen.Return(jen.Id("m"))).Line()
+}
+
+// Helper method generating the deserialization statement consisting of:
+// 1. source byte slice 'b[m]' bounds check,
+// 2. convert deserialized value to goType and append convertOp
+// 3. set deserialized value to valueReceiver
+// 4. add deserialized bytes size to slice position index variable 'm'
+func (tag *StrucTag) genBinToTypeStatement(goType, binType string, convertOp *jen.Statement, valueReceiver *jen.Statement) *jen.Statement {
+	plus := jen.Null()
+	v := jen.Id(goType).Call(tag.binaryToType(binType, plus)).Add(convertOp)
+	if tag.method == Size {
+		return jen.Id("m").Op("+=").Add(plus)
+	}
+	return checkBound(plus).Add(valueReceiver.Clone()).Op("=").Add(v).Line().Id("m").Op("+=").Add(plus)
+}
 func (tag *StrucTag) BinaryToType(goType string, n *jen.Statement) *jen.Statement {
 	switch goType { //wrap incoming gotype or treat seperately if necessary
 	case "bool":
-		plus := jen.Null()
-		v := tag.binaryToType("uint8", plus).Op(">").Lit(0)
-		if tag.method == Size {
-			return plus
-		}
-		return n.Clone().Op("=").Add(v).Line().Add(plus)
+		return tag.genBinToTypeStatement("uint8", "uint8", jen.Op(">").Lit(0), n)
 	case "string":
 		return tag.binaryToType(goType, n)
 	}
 
 	switch tag.Type { //only allow  valid tag types
 	case "bool":
-		plus := jen.Null()
-		v := tag.binaryToType("uint8", plus)
-		if tag.method == Size {
-			return plus
-		}
-		return n.Clone().Op("=").Id(goType).Call(v).Op("&").Lit(1).Line().Add(plus)
+		return tag.genBinToTypeStatement(goType, "uint8", jen.Op("&").Lit(1), n)
 	case "byte", "uint8", "uint16", "uint32", "uint64", "int8", "int16", "int32", "int64", "int", "uint", "float32", "float64":
-		plus := jen.Null()
-		v := tag.binaryToType(tag.Type, plus)
-		if tag.method == Size {
-			return plus
-		}
-		return n.Clone().Op("=").Id(goType).Call(v).Line().Add(plus)
+		return tag.genBinToTypeStatement(goType, tag.Type, jen.Null(), n)
 	default:
 		panic("Unable to handle unknown struc:" + tag.Type + " for field " + tag.field.Name())
 	}
@@ -56,11 +61,11 @@ func (tag *StrucTag) BinaryToType(goType string, n *jen.Statement) *jen.Statemen
 func (tag *StrucTag) binaryToType(goType string, n *jen.Statement) *jen.Statement {
 	switch goType {
 	case "byte", "uint8":
-		n.Id("m").Op("+=").Lit(1)
+		n.Lit(1)
 		return jen.Id("b").Index(jen.Id("m"))
 	case "string":
 		_, exactlen := tag.GetNewLoopVar()
-		j := n.Clone().Op("=").String().Call(jen.Id("b").Index(jen.Id("m").Op(":").Id("m").Op("+").Add(exactlen)))
+		j := checkBound(exactlen).Add(n.Clone()).Op("=").String().Call(jen.Id("b").Index(jen.Id("m").Op(":").Id("m").Op("+").Add(exactlen)))
 		if tag.method == Size {
 			j = jen.Null()
 		}
@@ -88,7 +93,7 @@ func (tag *StrucTag) binaryToType(goType string, n *jen.Statement) *jen.Statemen
 				st.Id(goType).Call(jen.Id("b").Index(jen.Id("m").Op("+").Lit(i))).Op("<<").Lit(8 * (len - 1 - i))
 			}
 		}
-		n.Id("m").Op("+=").Lit(len)
+		n.Lit(len)
 		return st
 	case "float32", "float64":
 		return jen.Qual("math", "F"+goType[1:]+"frombits").Call(tag.binaryToType("uint"+goType[5:], n))
