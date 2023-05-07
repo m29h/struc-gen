@@ -4,6 +4,9 @@ package test
 import "unsafe"
 
 func (s *BitfieldExample) MarshalBinary(b []byte) int {
+	if len(b) < s.SizeOf() {
+		return 0
+	}
 	m := 0
 	// A
 	if byteOff, bitOff := m/8, m%8; bitOff+4 <= 8 {
@@ -176,7 +179,43 @@ func (s *BitfieldExample) SizeOf() int {
 	return m / 8
 }
 
+func (s *BitfieldExampleBench) SizeOf() int {
+	m := 0
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	m += 2
+	if m%8 > 0 {
+		m += 8 - m%8
+	}
+
+	return m / 8
+}
+
 func (s *BitfieldExampleBench) MarshalBinary(b []byte) int {
+	if len(b) < s.SizeOf() {
+		return 0
+	}
 	m := 0
 	// V1
 	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
@@ -722,40 +761,10 @@ func (s *BitfieldExampleBench) UnmarshalBinary(b []byte) int {
 	return m / 8
 }
 
-func (s *BitfieldExampleBench) SizeOf() int {
-	m := 0
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	if m%8 > 0 {
-		m += 8 - m%8
-	}
-
-	return m / 8
-}
-
 func (s *ByteExampleBench) MarshalBinary(b []byte) int {
+	if len(b) < s.SizeOf() {
+		return 0
+	}
 	m := 0
 	// V1
 	b[m/8] = uint8(s.V1)

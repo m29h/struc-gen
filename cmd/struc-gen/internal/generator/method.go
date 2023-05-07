@@ -28,11 +28,10 @@ func NewMethodBuilder(TypeName string, Type *types.Struct) *MethodBuilder {
 	}
 }
 
-func (m *MethodBuilder) MakeMethodCode(gen structag.TagPrompter) (*jen.Statement, error) {
+func (m *MethodBuilder) MakeMethodCode(gen structag.TagPrompter) ([]jen.Code, error) {
 	var funcBlock []jen.Code
 	anyBitFields := false
 
-	// 2. Build "m := make(map[string]interface{})"
 	funcBlock = append(funcBlock, jen.Id("m").Op(":=").Lit(0))
 
 	for i := 0; i < m.structType.NumFields(); i++ {
@@ -65,7 +64,7 @@ func (m *MethodBuilder) MakeMethodCode(gen structag.TagPrompter) (*jen.Statement
 	}
 	// 4. Build return statement
 	funcBlock = append(funcBlock, jen.Return(jen.Id("m").Op("/").Lit(8)))
-	return jen.Block(funcBlock...), nil
+	return funcBlock, nil
 }
 
 func (m *MethodBuilder) MethodInterfaceBuilder(methodname string) (*jen.Statement, error) {
@@ -76,6 +75,17 @@ func (m *MethodBuilder) MethodInterfaceBuilder(methodname string) (*jen.Statemen
 		return jen.Func().Params(structag.RootStructName().Op("*").Id(m.sourceTypeName)).Id(methodname).Params().Int(), nil
 	default:
 		return nil, fmt.Errorf("MethodInterfaceBuilder: Unknown methodname %s", methodname)
+	}
+}
+
+func (m *MethodBuilder) MethodHeaderBuilder(methodname string) *jen.Statement {
+	switch methodname {
+	case "MarshalBinary":
+		return jen.If(jen.Len(jen.Id("b")).Op("<").Add(structag.RootStructName()).Dot("SizeOf").Call()).Block(
+			jen.Return(jen.Lit(0)), //return zero if b[] is not of sufficient length
+		)
+	default:
+		return jen.Null()
 	}
 }
 
@@ -92,9 +102,10 @@ func (m *MethodBuilder) MakeMethods() *jen.Statement {
 			fmt.Println(err)
 			return result
 		}
-
+		header := m.MethodHeaderBuilder(methodname)
 		// Build method
-		result.Add(definition).Add(block).Line().Line()
+		def := append([]jen.Code{header}, block...)
+		result.Add(definition).Block(def...).Line().Line()
 
 	}
 	return result

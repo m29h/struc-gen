@@ -1,10 +1,11 @@
 # struc-gen
 Struc-gen is a code generator for Go that generates methods for binary struct Marshaling and Unmarshaling. The behaviour can be configured by adding struct tags. The configuration options are heavily inspired and substantially compatible with those used by [`lunixbochs/struc`](https://github.com/lunixbochs/struc)
-The code supports most basic Go types as well as bitfield types (1-7 bit); bitfield types get "tightly packed" on a bit level.
 
-This code is currently EXPERIMENTAL. The API may be changed at any time without notice. In favour of performance there is currently limited error handling. The byte slice for marshaling must be pre-allocated to sufficient size or else marshaling will panic(). Use the SizeOf() method to determine suitable byte slice size.
+The code supports most basic Go types as well as bitfield types 1 to 7 bit; bitfield types get "tightly packed" on a bit level.
 
-Unmarshaling is terminating gracefully if the end of byte slice is reached prematurely. Unmarshaling invalid byte stream that terminates gracefully may leave the struct partially uninizialized but it will not read out of bounds and most importantly can not crash your application.
+The API may be changed at any time without notice. In favour of performance there is currently limited error handling. The byte slice for marshaling must be pre-allocated to sufficient size or else marshaling will not do anything and return 0. Use the `SizeOf()` method to determine suitable byte slice size to allocate.
+
+Unmarshaling is terminating gracefully if the end of byte slice is reached prematurely. Unmarshaling an invalid/incomplete byte stream may leave the struct partially uninizialized but it will not read out of bounds and most importantly can not crash your application.
 
 Very basic validation can be achieved with e.g.:
 ```go
@@ -16,17 +17,19 @@ return o, nil
 ```
 Slices and pointer receivers are automatically allocated if they are nil in UnmarshalBinary. Slices are resized when necessary in UnmarshalBinary
 ## Supported Tag Binary Type Specifiers
-Regular integer types `(u)int(8/16/32/64)` 
-Floating Point types `float(32/64)` 
-Go Strings `string`
-Unsigned bitfield Types `uint(1/2/3/4/5/6/7)` get tightly packed after each other. Padding bits are autmatically introduced after bitfields to make the next non-bitfield types byte-aligned again.
-Dummy type to introduce byte padding `pad`, always marshaled as `0x00`
-Array types of any of the above `[len]XXXX`, (including arrays of bitfield Types that get tightly packed! For example an `[8]uint3` packs 8 numbers into three bytes)
-Slice types of any of the above `[]XXXX`, requires another field to be tagged with `sizeof=SliceFieldName`. This other field then stores the SliceField size
 
-for compatibility [`lunixbochs/struc`](https://github.com/lunixbochs/struc) also the types `bool` and `byte` are supported that both effectively map to `uint8`
+The following types are supported for binary marshaling
+ - unsigned integer types `uint8` `uint16` `uint32` `uint64` 
+ - floating Point types `float32` `float64` 
+ - Go Strings `string` requires a linked `sizeof=...` field to store the string length
+ - unsigned bitfield types `uint1``uint2``uint3``uint4``uint5``uint6``uint7`. These get tightly packed after each other. Padding bits are automatically introduced after bitfields to make the next non-bitfield types byte-aligned again.
+ - Dummy type to introduce byte padding `pad`, always marshaled as `0x00`
+ - Array types of any of the above by prepending `[len]` syntax, (including arrays of bitfield types get tightly packed! For example an `[4]uint6` packs 4 numbers into three bytes)
+ - Slice types of any of the above `[]`, requires another linked field to be tagged with `sizeof=...` to store the slice size
 
-Map types are unsupported currently. You can however make it a custom named type and manually implement its `MarshalBinary([]byte)int`,`UnarshalBinary([]byte)int` and `SizeOf()int` methods
+for compatibility [`lunixbochs/struc`](https://github.com/lunixbochs/struc) also the types `bool` and `byte` are supported that both effectively map to a binary `uint8`
+
+Map types are unsupported currently. You can however make it a custom named type and manually implement its `MarshalBinary([]byte) int`,`UnarshalBinary([]byte) int` and `SizeOf() int` methods
 
 ## Useage
 ```go
@@ -57,7 +60,7 @@ func main() {
 	o := &Example{}
 	o.UnmarshalBinary(buf)
 	fmt.Printf("t=%v,o=%v\n", t, o)
-	//t=&{6 [1 2 30000 4 5 6] 30 11 Hello World},o=&{6 [1 2 30000 4 5 6] 14 11 Hello World}
+	//t=&{6 1337 [1 2 30000 4 5 6] 30 11 Hello World},o=&{6 0 [1 2 30000 4 5 6] 14 11 Hello World}
 }
 ```
 

@@ -12,8 +12,6 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
-// struc:"int32,big,sizeof=Data,skip,sizefrom=Len"
-
 type directionT uint32
 
 const (
