@@ -17,6 +17,9 @@ func (i *Int3) MarshalBinary(p []byte) int {
 }
 func (i *Int3) UnmarshalBinary(p []byte) int {
 	var tmp [4]byte
+	if len(p) < 3 {
+		return 0
+	}
 	tmp[1] = p[0]
 	tmp[2] = p[1]
 	tmp[3] = p[2]

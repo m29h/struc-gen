@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/types"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -52,6 +53,30 @@ func (t *StrucTag) GetNewLoopVar() (*jen.Statement, *jen.Statement) {
 		panic("Syntax error for " + t.field.Name() + ": Insufficient definition for slice/array sizeof")
 	}
 	return jen.Id(t.loopvars[len(t.loopvars)-1]), jen.Int().Call(t.forceSize[len(t.loopvars)-1])
+}
+
+func (t *StrucTag) GetBitLen() int {
+	if strings.HasPrefix(t.Type, "uint") ||
+		strings.HasPrefix(t.Type, "int") ||
+		strings.HasPrefix(t.Type, "float") {
+
+		re := regexp.MustCompile("[0-9]+")
+		res := re.FindAllString(t.Type, -1)
+		if len(res) == 0 {
+			return 32 // default size of platform dependent types
+		}
+		len, err := strconv.Atoi(res[0])
+		if err != nil {
+			panic(err)
+		}
+		return len
+	}
+	switch t.Type {
+	case "string", "byte", "pad", "bool":
+		return 8
+	default:
+		return 8
+	}
 }
 
 var (

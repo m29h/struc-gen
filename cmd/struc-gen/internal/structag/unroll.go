@@ -11,12 +11,12 @@ import (
 func (tag *StrucTag) unroll(t types.Type, n *jen.Statement) (*jen.Statement, error) {
 	if tag.Type == "pad" {
 		lvar, lmax := tag.GetNewLoopVar()
-		cast := jen.Id("b").Index(jen.Id("m").Op("+").Id("i")).Op("=").Lit(0)
+		cast := jen.Id("b").Index(jen.Id("m").Op("/").Lit(8).Op("+").Id("i")).Op("=").Lit(0)
 		cast = jen.For(lvar.Clone().Op(":=").Lit(0), lvar.Clone().Op("<").Add(lmax), lvar.Clone().Op("++")).Block(cast).Line()
 		if tag.method != MarshalBinary {
 			cast = jen.Null()
 		}
-		return cast.Id("m").Op("+=").Add(lmax), nil
+		return cast.Id("m").Op("+=").Add(lmax).Op("*").Lit(tag.GetBitLen()), nil
 	}
 	switch v := t.(type) {
 	case *types.Basic:
@@ -31,11 +31,11 @@ func (tag *StrucTag) unroll(t types.Type, n *jen.Statement) (*jen.Statement, err
 	case *types.Named:
 		switch tag.method {
 		case MarshalBinary:
-			return jen.Id("m").Op("+=").Add(n.Clone().Dot("MarshalBinary").Call(jen.Id("b").Index(jen.Id("m").Op(":")))), nil
+			return jen.Id("m").Op("+=").Add(n.Clone().Dot("MarshalBinary").Call(jen.Id("b").Index(jen.Id("m").Op("/").Lit(8).Op(":"))).Op("*").Lit(8)), nil
 		case UnmarshalBinary:
-			return jen.Id("m").Op("+=").Add(n.Clone().Dot("UnmarshalBinary").Call(jen.Id("b").Index(jen.Id("m").Op(":")))), nil
+			return jen.Id("m").Op("+=").Add(n.Clone().Dot("UnmarshalBinary").Call(jen.Id("b").Index(jen.Id("m").Op("/").Lit(8).Op(":"))).Op("*").Lit(8)), nil
 		case Size:
-			return jen.Id("m").Op("+=").Add(n.Clone().Dot("SizeOf").Call()), nil
+			return jen.Id("m").Op("+=").Add(n.Clone().Dot("SizeOf").Call().Op("*").Lit(8)), nil
 
 		default:
 			panic("Unimplemented byte packing direction")

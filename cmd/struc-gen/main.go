@@ -6,9 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/m29h/struc-gen/cmd/struc-gen/internal/structag"
-
 	"github.com/dave/jennifer/jen"
+	"github.com/m29h/struc-gen/cmd/struc-gen/internal/generator"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -62,50 +61,9 @@ func generate(t map[string]*types.Struct) error {
 
 	// Collect Function block serializing whole struct
 	for sourceTypeName, structType := range t {
-		var funcBlock []jen.Code
-		var funcBlockUnpack []jen.Code
-		var funcBlockSize []jen.Code
-
-		// 2. Build "m := make(map[string]interface{})"
-		funcBlock = append(funcBlock, jen.Id("m").Op(":=").Lit(0))
-		funcBlockUnpack = append(funcBlockUnpack, jen.Id("m").Op(":=").Lit(0))
-		funcBlockSize = append(funcBlockSize, jen.Id("m").Op(":=").Lit(0))
 		fmt.Printf("->%s\n", sourceTypeName)
-		for i := 0; i < structType.NumFields(); i++ {
-
-			tag := structag.NewStrucTag(structType.Field(i), structType.Tag(i))
-			// Generate code for each changeset field
-			p, _ := tag.Pack()
-			u, _ := tag.Unpack()
-			s, _ := tag.GetSize()
-			funcBlock = append(funcBlock, p)
-			funcBlockUnpack = append(funcBlockUnpack, u)
-			funcBlockSize = append(funcBlockSize, s)
-
-		}
-
-		// 4. Build return statement
-		funcBlock = append(funcBlock, jen.Return(jen.Id("m")))
-		funcBlockUnpack = append(funcBlockUnpack, jen.Return(jen.Id("m")))
-		funcBlockSize = append(funcBlockSize, jen.Return(jen.Id("m")))
-
-		// 5. Build method
-		f.Func().Params(
-			structag.RootStructName().Op("*").Id(sourceTypeName),
-		).Id("MarshalBinary").Params(jen.Id("b").Index().Byte()).Int().Block(
-			funcBlock...,
-		)
-		f.Func().Params(
-			structag.RootStructName().Op("*").Id(sourceTypeName),
-		).Id("UnmarshalBinary").Params(jen.Id("b").Index().Byte()).Int().Block(
-			funcBlockUnpack...,
-		)
-		f.Func().Params(
-			structag.RootStructName().Op("*").Id(sourceTypeName),
-		).Id("SizeOf").Params().Int().Block(
-			funcBlockSize...,
-		)
-
+		mb := generator.NewMethodBuilder(sourceTypeName, structType)
+		f.Add(mb.MakeMethods())
 	}
 
 	// Build the target file name
