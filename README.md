@@ -1,3 +1,5 @@
+[![Tests](https://github.com/m29h/struc-gen/actions/workflows/push.yml/badge.svg)](https://github.com/m29h/struc-gen/actions/workflows/push.yml)
+
 # struc-gen
 Struc-gen is a code generator for Go that generates methods for binary struct Marshaling and Unmarshaling. The behaviour can be configured by adding struct tags. The configuration options are heavily inspired and substantially compatible with those used by [`lunixbochs/struc`](https://github.com/lunixbochs/struc)
 
@@ -22,7 +24,7 @@ The following types are supported for binary marshaling
  - unsigned integer types `uint8` `uint16` `uint32` `uint64` 
  - floating Point types `float32` `float64` 
  - Go Strings `string` requires a linked `sizeof=...` field to store the string length
- - unsigned bitfield types `uint1``uint2``uint3``uint4``uint5``uint6``uint7`. These get tightly packed after each other. Padding bits are automatically introduced after bitfields to make the next non-bitfield types byte-aligned again.
+ - unsigned bitfield types `uint1` `uint2` `uint3` `uint4` `uint5` `uint6` `uint7`. These get tightly packed after each other. Padding bits are automatically introduced after bitfields to make the next non-bitfield types byte-aligned again.
  - Dummy type to introduce byte padding `pad`, always marshaled as `0x00`
  - Array types of any of the above by prepending `[len]` syntax, (including arrays of bitfield types get tightly packed! For example an `[4]uint6` packs 4 numbers into three bytes)
  - Slice types of any of the above `[]`, requires another linked field to be tagged with `sizeof=...` to store the slice size
