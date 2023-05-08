@@ -1,0 +1,27 @@
+name: Tests on pullrequest
+
+on:
+  pull_request:
+    branches: ["main"]
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [ '1.18.x', '1.19.x', '1.20.x' ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Install dependencies
+        run: go get ./...
+      - name: Install struc-gen
+        run: go install ./cmd/struc-gen
+      - name: Generate Code for testcases
+        run: go generate ./...
+      - name: Test with Go
+        run: go test ./testcase -json > TestResults-${{ matrix.go-version }}.json

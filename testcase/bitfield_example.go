@@ -1,6 +1,6 @@
 package test
 
-//go:generate go run github.com/m29h/struc-gen/cmd/struc-gen
+//go:generate struc-gen
 
 type BitfieldExample struct {
 	A  int     `struc:"uint4"`

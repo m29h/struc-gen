@@ -6,6 +6,287 @@ import (
 	"unsafe"
 )
 
+func (s *Example) MarshalBinary(b []byte) int {
+	if len(b) < s.SizeOf() {
+		return 0
+	}
+	m := 0
+	// Pad
+	for i := 0; i < int(5); i++ {
+		b[m/8+i] = 0
+	}
+	m += int(5) * 8
+	// I8f
+	b[m/8] = (uint8)(int8(s.I8f))
+	m += 8
+	// I16f
+	_ = b[m/8+1] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte((uint16)(int16(s.I16f)) >> 8)
+	b[m/8+1] = byte((uint16)(int16(s.I16f)) >> 0)
+	m += 16
+	// I32f
+	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte((uint32)(int32(s.I32f)) >> 24)
+	b[m/8+1] = byte((uint32)(int32(s.I32f)) >> 16)
+	b[m/8+2] = byte((uint32)(int32(s.I32f)) >> 8)
+	b[m/8+3] = byte((uint32)(int32(s.I32f)) >> 0)
+	m += 32
+	// I64f
+	_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte((uint64)(int64(s.I64f)) >> 56)
+	b[m/8+1] = byte((uint64)(int64(s.I64f)) >> 48)
+	b[m/8+2] = byte((uint64)(int64(s.I64f)) >> 40)
+	b[m/8+3] = byte((uint64)(int64(s.I64f)) >> 32)
+	b[m/8+4] = byte((uint64)(int64(s.I64f)) >> 24)
+	b[m/8+5] = byte((uint64)(int64(s.I64f)) >> 16)
+	b[m/8+6] = byte((uint64)(int64(s.I64f)) >> 8)
+	b[m/8+7] = byte((uint64)(int64(s.I64f)) >> 0)
+	m += 64
+	// U8f
+	b[m/8] = uint8(s.U8f)
+	m += 8
+	// U16f
+	_ = b[m/8+1] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte(uint16(s.U16f) >> 0)
+	b[m/8+1] = byte(uint16(s.U16f) >> 8)
+	m += 16
+	// U32f
+	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte(uint32(s.U32f) >> 0)
+	b[m/8+1] = byte(uint32(s.U32f) >> 8)
+	b[m/8+2] = byte(uint32(s.U32f) >> 16)
+	b[m/8+3] = byte(uint32(s.U32f) >> 24)
+	m += 32
+	// U64f
+	_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte(uint64(s.U64f) >> 0)
+	b[m/8+1] = byte(uint64(s.U64f) >> 8)
+	b[m/8+2] = byte(uint64(s.U64f) >> 16)
+	b[m/8+3] = byte(uint64(s.U64f) >> 24)
+	b[m/8+4] = byte(uint64(s.U64f) >> 32)
+	b[m/8+5] = byte(uint64(s.U64f) >> 40)
+	b[m/8+6] = byte(uint64(s.U64f) >> 48)
+	b[m/8+7] = byte(uint64(s.U64f) >> 56)
+	m += 64
+	// Boolf
+	b[m/8] = uint8(s.Boolf & 1)
+	m += 8
+	// Byte4f
+	for i := 0; i < int(4); i++ {
+		b[m/8] = byte(s.Byte4f[i])
+		m += 8
+	}
+	// I8
+	b[m/8] = (uint8)(int8(s.I8))
+	m += 8
+	// I16
+	_ = b[m/8+1] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte((uint16)(int16(s.I16)) >> 8)
+	b[m/8+1] = byte((uint16)(int16(s.I16)) >> 0)
+	m += 16
+	// I32
+	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte((uint32)(int32(s.I32)) >> 24)
+	b[m/8+1] = byte((uint32)(int32(s.I32)) >> 16)
+	b[m/8+2] = byte((uint32)(int32(s.I32)) >> 8)
+	b[m/8+3] = byte((uint32)(int32(s.I32)) >> 0)
+	m += 32
+	// I64
+	_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte((uint64)(int64(s.I64)) >> 56)
+	b[m/8+1] = byte((uint64)(int64(s.I64)) >> 48)
+	b[m/8+2] = byte((uint64)(int64(s.I64)) >> 40)
+	b[m/8+3] = byte((uint64)(int64(s.I64)) >> 32)
+	b[m/8+4] = byte((uint64)(int64(s.I64)) >> 24)
+	b[m/8+5] = byte((uint64)(int64(s.I64)) >> 16)
+	b[m/8+6] = byte((uint64)(int64(s.I64)) >> 8)
+	b[m/8+7] = byte((uint64)(int64(s.I64)) >> 0)
+	m += 64
+	// U8
+	b[m/8] = uint8(s.U8)
+	m += 8
+	// U16
+	_ = b[m/8+1] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte(uint16(s.U16) >> 0)
+	b[m/8+1] = byte(uint16(s.U16) >> 8)
+	m += 16
+	// U32
+	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte(uint32(s.U32) >> 0)
+	b[m/8+1] = byte(uint32(s.U32) >> 8)
+	b[m/8+2] = byte(uint32(s.U32) >> 16)
+	b[m/8+3] = byte(uint32(s.U32) >> 24)
+	m += 32
+	// U64
+	_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte(uint64(s.U64) >> 0)
+	b[m/8+1] = byte(uint64(s.U64) >> 8)
+	b[m/8+2] = byte(uint64(s.U64) >> 16)
+	b[m/8+3] = byte(uint64(s.U64) >> 24)
+	b[m/8+4] = byte(uint64(s.U64) >> 32)
+	b[m/8+5] = byte(uint64(s.U64) >> 40)
+	b[m/8+6] = byte(uint64(s.U64) >> 48)
+	b[m/8+7] = byte(uint64(s.U64) >> 56)
+	m += 64
+	// BoolT
+	b[m/8] = uint8(*(*uint8)(unsafe.Pointer(&s.BoolT)) & 1 & 1)
+	m += 8
+	// BoolF
+	b[m/8] = uint8(*(*uint8)(unsafe.Pointer(&s.BoolF)) & 1 & 1)
+	m += 8
+	// Byte4
+	for i := 0; i < int(4); i++ {
+		b[m/8] = byte(s.Byte4[i])
+		m += 8
+	}
+	// Float1
+	{
+		tmp := math.Float32bits(float32(float32(s.Float1)))
+		_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
+		b[m/8+0] = byte(tmp >> 24)
+		b[m/8+1] = byte(tmp >> 16)
+		b[m/8+2] = byte(tmp >> 8)
+		b[m/8+3] = byte(tmp >> 0)
+		m += 32
+	}
+	// Float2
+	{
+		tmp := math.Float64bits(float64(float64(s.Float2)))
+		_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
+		b[m/8+0] = byte(tmp >> 56)
+		b[m/8+1] = byte(tmp >> 48)
+		b[m/8+2] = byte(tmp >> 40)
+		b[m/8+3] = byte(tmp >> 32)
+		b[m/8+4] = byte(tmp >> 24)
+		b[m/8+5] = byte(tmp >> 16)
+		b[m/8+6] = byte(tmp >> 8)
+		b[m/8+7] = byte(tmp >> 0)
+		m += 64
+	}
+	// I32f2
+	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte((uint32)(int32(s.I32f2)) >> 24)
+	b[m/8+1] = byte((uint32)(int32(s.I32f2)) >> 16)
+	b[m/8+2] = byte((uint32)(int32(s.I32f2)) >> 8)
+	b[m/8+3] = byte((uint32)(int32(s.I32f2)) >> 0)
+	m += 32
+	// U32f2
+	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte(uint32(s.U32f2) >> 24)
+	b[m/8+1] = byte(uint32(s.U32f2) >> 16)
+	b[m/8+2] = byte(uint32(s.U32f2) >> 8)
+	b[m/8+3] = byte(uint32(s.U32f2) >> 0)
+	m += 32
+	// I32f3
+	_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte((uint64)(int64(s.I32f3)) >> 56)
+	b[m/8+1] = byte((uint64)(int64(s.I32f3)) >> 48)
+	b[m/8+2] = byte((uint64)(int64(s.I32f3)) >> 40)
+	b[m/8+3] = byte((uint64)(int64(s.I32f3)) >> 32)
+	b[m/8+4] = byte((uint64)(int64(s.I32f3)) >> 24)
+	b[m/8+5] = byte((uint64)(int64(s.I32f3)) >> 16)
+	b[m/8+6] = byte((uint64)(int64(s.I32f3)) >> 8)
+	b[m/8+7] = byte((uint64)(int64(s.I32f3)) >> 0)
+	m += 64
+	// Size1
+	s.Size1 = int(len(s.Str))
+	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte((uint32)(int(s.Size1)) >> 0)
+	b[m/8+1] = byte((uint32)(int(s.Size1)) >> 8)
+	b[m/8+2] = byte((uint32)(int(s.Size1)) >> 16)
+	b[m/8+3] = byte((uint32)(int(s.Size1)) >> 24)
+	m += 32
+	// Str
+	for i := copy(b[m/8:m/8+int(s.Size1)], []byte(s.Str)); i < int(s.Size1); i++ {
+		b[m/8+i] = 0
+	}
+	m += int(s.Size1) * 8
+	// Strb
+	for i := copy(b[m/8:m/8+int(4)], []byte(s.Strb)); i < int(4); i++ {
+		b[m/8+i] = 0
+	}
+	m += int(4) * 8
+	// Size2
+	s.Size2 = int(len(s.Str2))
+	b[m/8] = uint8(s.Size2)
+	m += 8
+	// Str2
+	for i := copy(b[m/8:m/8+int(s.Size2)], []byte(s.Str2)); i < int(s.Size2); i++ {
+		b[m/8+i] = 0
+	}
+	m += int(s.Size2) * 8
+	// Size3
+	s.Size3 = int(len(s.Bstr))
+	b[m/8] = uint8(s.Size3)
+	m += 8
+	// Bstr
+	for i := 0; i < int(s.Size3); i++ {
+		b[m/8] = byte(s.Bstr[i])
+		m += 8
+	}
+	// Size4
+	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte((uint32)(int(s.Size4)) >> 0)
+	b[m/8+1] = byte((uint32)(int(s.Size4)) >> 8)
+	b[m/8+2] = byte((uint32)(int(s.Size4)) >> 16)
+	b[m/8+3] = byte((uint32)(int(s.Size4)) >> 24)
+	m += 32
+	// Str4a
+	for i := copy(b[m/8:m/8+int(s.Size4)], []byte(s.Str4a)); i < int(s.Size4); i++ {
+		b[m/8+i] = 0
+	}
+	m += int(s.Size4) * 8
+	// Str4b
+	for i := copy(b[m/8:m/8+int(s.Size4)], []byte(s.Str4b)); i < int(s.Size4); i++ {
+		b[m/8+i] = 0
+	}
+	m += int(s.Size4) * 8
+	// Size5
+	b[m/8] = uint8(s.Size5)
+	m += 8
+	// Bstr2
+	for i := 0; i < int(s.Size5); i++ {
+		b[m/8] = byte(s.Bstr2[i])
+		m += 8
+	}
+	// Nested
+	m += s.Nested.MarshalBinary(b[m/8:]) * 8
+	// NestedP
+	m += (*s.NestedP).MarshalBinary(b[m/8:]) * 8
+	// TestP64
+	_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte((uint64)(int64((*s.TestP64))) >> 56)
+	b[m/8+1] = byte((uint64)(int64((*s.TestP64))) >> 48)
+	b[m/8+2] = byte((uint64)(int64((*s.TestP64))) >> 40)
+	b[m/8+3] = byte((uint64)(int64((*s.TestP64))) >> 32)
+	b[m/8+4] = byte((uint64)(int64((*s.TestP64))) >> 24)
+	b[m/8+5] = byte((uint64)(int64((*s.TestP64))) >> 16)
+	b[m/8+6] = byte((uint64)(int64((*s.TestP64))) >> 8)
+	b[m/8+7] = byte((uint64)(int64((*s.TestP64))) >> 0)
+	m += 64
+	// NestedSize
+	s.NestedSize = int(len(s.NestedA))
+	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
+	b[m/8+0] = byte((uint32)(int(s.NestedSize)) >> 24)
+	b[m/8+1] = byte((uint32)(int(s.NestedSize)) >> 16)
+	b[m/8+2] = byte((uint32)(int(s.NestedSize)) >> 8)
+	b[m/8+3] = byte((uint32)(int(s.NestedSize)) >> 0)
+	m += 32
+	// NestedA
+	for i := 0; i < int(s.NestedSize); i++ {
+		m += s.NestedA[i].MarshalBinary(b[m/8:]) * 8
+	}
+	// CustomTypeSize
+	s.CustomTypeSize = Int3(len(s.CustomTypeSizeArr))
+	m += s.CustomTypeSize.MarshalBinary(b[m/8:]) * 8
+	// CustomTypeSizeArr
+	for i := 0; i < int(s.CustomTypeSize); i++ {
+		b[m/8] = byte(s.CustomTypeSizeArr[i])
+		m += 8
+	}
+	return m / 8
+}
+
 func (s *Example) UnmarshalBinary(b []byte) int {
 	m := 0
 	// Pad
@@ -368,287 +649,6 @@ func (s *Example) SizeOf() int {
 	s.CustomTypeSize = Int3(len(s.CustomTypeSizeArr))
 	m += s.CustomTypeSize.SizeOf() * 8
 	for i := 0; i < int(s.CustomTypeSize); i++ {
-		m += 8
-	}
-	return m / 8
-}
-
-func (s *Example) MarshalBinary(b []byte) int {
-	if len(b) < s.SizeOf() {
-		return 0
-	}
-	m := 0
-	// Pad
-	for i := 0; i < int(5); i++ {
-		b[m/8+i] = 0
-	}
-	m += int(5) * 8
-	// I8f
-	b[m/8] = (uint8)(int8(s.I8f))
-	m += 8
-	// I16f
-	_ = b[m/8+1] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte((uint16)(int16(s.I16f)) >> 8)
-	b[m/8+1] = byte((uint16)(int16(s.I16f)) >> 0)
-	m += 16
-	// I32f
-	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte((uint32)(int32(s.I32f)) >> 24)
-	b[m/8+1] = byte((uint32)(int32(s.I32f)) >> 16)
-	b[m/8+2] = byte((uint32)(int32(s.I32f)) >> 8)
-	b[m/8+3] = byte((uint32)(int32(s.I32f)) >> 0)
-	m += 32
-	// I64f
-	_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte((uint64)(int64(s.I64f)) >> 56)
-	b[m/8+1] = byte((uint64)(int64(s.I64f)) >> 48)
-	b[m/8+2] = byte((uint64)(int64(s.I64f)) >> 40)
-	b[m/8+3] = byte((uint64)(int64(s.I64f)) >> 32)
-	b[m/8+4] = byte((uint64)(int64(s.I64f)) >> 24)
-	b[m/8+5] = byte((uint64)(int64(s.I64f)) >> 16)
-	b[m/8+6] = byte((uint64)(int64(s.I64f)) >> 8)
-	b[m/8+7] = byte((uint64)(int64(s.I64f)) >> 0)
-	m += 64
-	// U8f
-	b[m/8] = uint8(s.U8f)
-	m += 8
-	// U16f
-	_ = b[m/8+1] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte(uint16(s.U16f) >> 0)
-	b[m/8+1] = byte(uint16(s.U16f) >> 8)
-	m += 16
-	// U32f
-	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte(uint32(s.U32f) >> 0)
-	b[m/8+1] = byte(uint32(s.U32f) >> 8)
-	b[m/8+2] = byte(uint32(s.U32f) >> 16)
-	b[m/8+3] = byte(uint32(s.U32f) >> 24)
-	m += 32
-	// U64f
-	_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte(uint64(s.U64f) >> 0)
-	b[m/8+1] = byte(uint64(s.U64f) >> 8)
-	b[m/8+2] = byte(uint64(s.U64f) >> 16)
-	b[m/8+3] = byte(uint64(s.U64f) >> 24)
-	b[m/8+4] = byte(uint64(s.U64f) >> 32)
-	b[m/8+5] = byte(uint64(s.U64f) >> 40)
-	b[m/8+6] = byte(uint64(s.U64f) >> 48)
-	b[m/8+7] = byte(uint64(s.U64f) >> 56)
-	m += 64
-	// Boolf
-	b[m/8] = uint8(s.Boolf & 1)
-	m += 8
-	// Byte4f
-	for i := 0; i < int(4); i++ {
-		b[m/8] = byte(s.Byte4f[i])
-		m += 8
-	}
-	// I8
-	b[m/8] = (uint8)(int8(s.I8))
-	m += 8
-	// I16
-	_ = b[m/8+1] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte((uint16)(int16(s.I16)) >> 8)
-	b[m/8+1] = byte((uint16)(int16(s.I16)) >> 0)
-	m += 16
-	// I32
-	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte((uint32)(int32(s.I32)) >> 24)
-	b[m/8+1] = byte((uint32)(int32(s.I32)) >> 16)
-	b[m/8+2] = byte((uint32)(int32(s.I32)) >> 8)
-	b[m/8+3] = byte((uint32)(int32(s.I32)) >> 0)
-	m += 32
-	// I64
-	_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte((uint64)(int64(s.I64)) >> 56)
-	b[m/8+1] = byte((uint64)(int64(s.I64)) >> 48)
-	b[m/8+2] = byte((uint64)(int64(s.I64)) >> 40)
-	b[m/8+3] = byte((uint64)(int64(s.I64)) >> 32)
-	b[m/8+4] = byte((uint64)(int64(s.I64)) >> 24)
-	b[m/8+5] = byte((uint64)(int64(s.I64)) >> 16)
-	b[m/8+6] = byte((uint64)(int64(s.I64)) >> 8)
-	b[m/8+7] = byte((uint64)(int64(s.I64)) >> 0)
-	m += 64
-	// U8
-	b[m/8] = uint8(s.U8)
-	m += 8
-	// U16
-	_ = b[m/8+1] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte(uint16(s.U16) >> 0)
-	b[m/8+1] = byte(uint16(s.U16) >> 8)
-	m += 16
-	// U32
-	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte(uint32(s.U32) >> 0)
-	b[m/8+1] = byte(uint32(s.U32) >> 8)
-	b[m/8+2] = byte(uint32(s.U32) >> 16)
-	b[m/8+3] = byte(uint32(s.U32) >> 24)
-	m += 32
-	// U64
-	_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte(uint64(s.U64) >> 0)
-	b[m/8+1] = byte(uint64(s.U64) >> 8)
-	b[m/8+2] = byte(uint64(s.U64) >> 16)
-	b[m/8+3] = byte(uint64(s.U64) >> 24)
-	b[m/8+4] = byte(uint64(s.U64) >> 32)
-	b[m/8+5] = byte(uint64(s.U64) >> 40)
-	b[m/8+6] = byte(uint64(s.U64) >> 48)
-	b[m/8+7] = byte(uint64(s.U64) >> 56)
-	m += 64
-	// BoolT
-	b[m/8] = uint8(*(*uint8)(unsafe.Pointer(&s.BoolT)) & 1 & 1)
-	m += 8
-	// BoolF
-	b[m/8] = uint8(*(*uint8)(unsafe.Pointer(&s.BoolF)) & 1 & 1)
-	m += 8
-	// Byte4
-	for i := 0; i < int(4); i++ {
-		b[m/8] = byte(s.Byte4[i])
-		m += 8
-	}
-	// Float1
-	{
-		tmp := math.Float32bits(float32(float32(s.Float1)))
-		_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
-		b[m/8+0] = byte(tmp >> 24)
-		b[m/8+1] = byte(tmp >> 16)
-		b[m/8+2] = byte(tmp >> 8)
-		b[m/8+3] = byte(tmp >> 0)
-		m += 32
-	}
-	// Float2
-	{
-		tmp := math.Float64bits(float64(float64(s.Float2)))
-		_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
-		b[m/8+0] = byte(tmp >> 56)
-		b[m/8+1] = byte(tmp >> 48)
-		b[m/8+2] = byte(tmp >> 40)
-		b[m/8+3] = byte(tmp >> 32)
-		b[m/8+4] = byte(tmp >> 24)
-		b[m/8+5] = byte(tmp >> 16)
-		b[m/8+6] = byte(tmp >> 8)
-		b[m/8+7] = byte(tmp >> 0)
-		m += 64
-	}
-	// I32f2
-	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte((uint32)(int32(s.I32f2)) >> 24)
-	b[m/8+1] = byte((uint32)(int32(s.I32f2)) >> 16)
-	b[m/8+2] = byte((uint32)(int32(s.I32f2)) >> 8)
-	b[m/8+3] = byte((uint32)(int32(s.I32f2)) >> 0)
-	m += 32
-	// U32f2
-	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte(uint32(s.U32f2) >> 24)
-	b[m/8+1] = byte(uint32(s.U32f2) >> 16)
-	b[m/8+2] = byte(uint32(s.U32f2) >> 8)
-	b[m/8+3] = byte(uint32(s.U32f2) >> 0)
-	m += 32
-	// I32f3
-	_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte((uint64)(int64(s.I32f3)) >> 56)
-	b[m/8+1] = byte((uint64)(int64(s.I32f3)) >> 48)
-	b[m/8+2] = byte((uint64)(int64(s.I32f3)) >> 40)
-	b[m/8+3] = byte((uint64)(int64(s.I32f3)) >> 32)
-	b[m/8+4] = byte((uint64)(int64(s.I32f3)) >> 24)
-	b[m/8+5] = byte((uint64)(int64(s.I32f3)) >> 16)
-	b[m/8+6] = byte((uint64)(int64(s.I32f3)) >> 8)
-	b[m/8+7] = byte((uint64)(int64(s.I32f3)) >> 0)
-	m += 64
-	// Size1
-	s.Size1 = int(len(s.Str))
-	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte((uint32)(int(s.Size1)) >> 0)
-	b[m/8+1] = byte((uint32)(int(s.Size1)) >> 8)
-	b[m/8+2] = byte((uint32)(int(s.Size1)) >> 16)
-	b[m/8+3] = byte((uint32)(int(s.Size1)) >> 24)
-	m += 32
-	// Str
-	for i := copy(b[m/8:m/8+int(s.Size1)], []byte(s.Str)); i < int(s.Size1); i++ {
-		b[m/8+i] = 0
-	}
-	m += int(s.Size1) * 8
-	// Strb
-	for i := copy(b[m/8:m/8+int(4)], []byte(s.Strb)); i < int(4); i++ {
-		b[m/8+i] = 0
-	}
-	m += int(4) * 8
-	// Size2
-	s.Size2 = int(len(s.Str2))
-	b[m/8] = uint8(s.Size2)
-	m += 8
-	// Str2
-	for i := copy(b[m/8:m/8+int(s.Size2)], []byte(s.Str2)); i < int(s.Size2); i++ {
-		b[m/8+i] = 0
-	}
-	m += int(s.Size2) * 8
-	// Size3
-	s.Size3 = int(len(s.Bstr))
-	b[m/8] = uint8(s.Size3)
-	m += 8
-	// Bstr
-	for i := 0; i < int(s.Size3); i++ {
-		b[m/8] = byte(s.Bstr[i])
-		m += 8
-	}
-	// Size4
-	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte((uint32)(int(s.Size4)) >> 0)
-	b[m/8+1] = byte((uint32)(int(s.Size4)) >> 8)
-	b[m/8+2] = byte((uint32)(int(s.Size4)) >> 16)
-	b[m/8+3] = byte((uint32)(int(s.Size4)) >> 24)
-	m += 32
-	// Str4a
-	for i := copy(b[m/8:m/8+int(s.Size4)], []byte(s.Str4a)); i < int(s.Size4); i++ {
-		b[m/8+i] = 0
-	}
-	m += int(s.Size4) * 8
-	// Str4b
-	for i := copy(b[m/8:m/8+int(s.Size4)], []byte(s.Str4b)); i < int(s.Size4); i++ {
-		b[m/8+i] = 0
-	}
-	m += int(s.Size4) * 8
-	// Size5
-	b[m/8] = uint8(s.Size5)
-	m += 8
-	// Bstr2
-	for i := 0; i < int(s.Size5); i++ {
-		b[m/8] = byte(s.Bstr2[i])
-		m += 8
-	}
-	// Nested
-	m += s.Nested.MarshalBinary(b[m/8:]) * 8
-	// NestedP
-	m += (*s.NestedP).MarshalBinary(b[m/8:]) * 8
-	// TestP64
-	_ = b[m/8+7] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte((uint64)(int64((*s.TestP64))) >> 56)
-	b[m/8+1] = byte((uint64)(int64((*s.TestP64))) >> 48)
-	b[m/8+2] = byte((uint64)(int64((*s.TestP64))) >> 40)
-	b[m/8+3] = byte((uint64)(int64((*s.TestP64))) >> 32)
-	b[m/8+4] = byte((uint64)(int64((*s.TestP64))) >> 24)
-	b[m/8+5] = byte((uint64)(int64((*s.TestP64))) >> 16)
-	b[m/8+6] = byte((uint64)(int64((*s.TestP64))) >> 8)
-	b[m/8+7] = byte((uint64)(int64((*s.TestP64))) >> 0)
-	m += 64
-	// NestedSize
-	s.NestedSize = int(len(s.NestedA))
-	_ = b[m/8+3] // bounds check hint to compiler; see golang.org/issue/14808
-	b[m/8+0] = byte((uint32)(int(s.NestedSize)) >> 24)
-	b[m/8+1] = byte((uint32)(int(s.NestedSize)) >> 16)
-	b[m/8+2] = byte((uint32)(int(s.NestedSize)) >> 8)
-	b[m/8+3] = byte((uint32)(int(s.NestedSize)) >> 0)
-	m += 32
-	// NestedA
-	for i := 0; i < int(s.NestedSize); i++ {
-		m += s.NestedA[i].MarshalBinary(b[m/8:]) * 8
-	}
-	// CustomTypeSize
-	s.CustomTypeSize = Int3(len(s.CustomTypeSizeArr))
-	m += s.CustomTypeSize.MarshalBinary(b[m/8:]) * 8
-	// CustomTypeSizeArr
-	for i := 0; i < int(s.CustomTypeSize); i++ {
-		b[m/8] = byte(s.CustomTypeSizeArr[i])
 		m += 8
 	}
 	return m / 8

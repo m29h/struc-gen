@@ -32,11 +32,15 @@ for compatibility [`lunixbochs/struc`](https://github.com/lunixbochs/struc) also
 Map types are unsupported currently. You can however make it a custom named type and manually implement its `MarshalBinary([]byte) int`,`UnarshalBinary([]byte) int` and `SizeOf() int` methods
 
 ## Useage
+- Install the struc-gen code generator `go install github.com/m29h/struc-gen/cmd/struc-gen@latest`
+- Annotate your go files for which you want to have the Marshaling methods generated with `//go:generate struc-gen`
+- Run `go generate ./...` in your go module directory
+
 ```go
 // the go generate expression will run code generator for all structs in this file.
 // put the struct in a seperate source code file to limit scope of code generation and avoid syntax errors while parsing file for code generation
 
-//go:generate go run github.com/m29h/struc-gen/cmd/struc-gen
+//go:generate struc-gen
 type Example struct {
 	//unexported fields such as a + c are no problem and treated just like exported fields
 	a int     `struc:"uint64,big,sizeof=B"` //encode in big endian, automatically set to length of slice B
