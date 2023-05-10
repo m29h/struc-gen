@@ -80,13 +80,13 @@ func TestEncode(t *testing.T) {
 		t.Fatal("encode failed")
 	}
 }
+
 func TestSizeOf(t *testing.T) {
 	if l := reference.SizeOf(); l != len(referenceBytes) {
 		t.Fatal("got different SizeOf() of bytes as expected")
 	}
 }
 func TestDecode(t *testing.T) {
-
 	out := &Example{}
 	if l := out.UnmarshalBinary(referenceBytes); l != len(referenceBytes) {
 		t.Fatalf("got different number of bytes as expected %d %d", l, len(referenceBytes))
@@ -94,6 +94,15 @@ func TestDecode(t *testing.T) {
 	if !reflect.DeepEqual(reference, out) {
 		fmt.Printf("got: %#v\nwant: %#v\n", out, reference)
 		t.Fatal("decode failed")
+	}
+}
+func TestValidate(t *testing.T) {
+	out := &Example{}
+	//with truncated referencebytes l must be != len(refBytes) (no read out of bounds allowed!)
+	for truncate := 0; truncate < len(referenceBytes); truncate++ {
+		if l := out.UnmarshalBinary(referenceBytes[:truncate]); l == len(referenceBytes) {
+			t.Fatalf("Unmarshal went further than allowed %d %d", l, len(referenceBytes))
+		}
 	}
 }
 

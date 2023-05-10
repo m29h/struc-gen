@@ -3,764 +3,330 @@ package test
 
 import "unsafe"
 
+func (s *BitfieldExample) MarshalBinary(b []byte) int {
+	if len(b) < s.SizeOf() {
+		return 0
+	}
+	m := 0
+	// A uint4
+
+	s.A = int(len(s.C2))
+	if 4 <= 8 {
+		b[(m + 0)] ^= byte(uint16(s.A&(15))) << 0
+	} else {
+		tmp := uint16(s.A&(15)) << 0
+		b[(m + 0)] ^= byte(tmp)
+		b[(m + 1)] ^= byte(tmp >> 8)
+	}
+
+	// B uint4
+
+	if 8 <= 8 {
+		b[(m + 0)] ^= byte(uint16(s.B&(15))) << 4
+	} else {
+		tmp := uint16(s.B&(15)) << 4
+		b[(m + 0)] ^= byte(tmp)
+		b[(m + 1)] ^= byte(tmp >> 8)
+	}
+
+	// C2 uint4
+
+	for i := 0; i < int(s.A); i++ {
+		if ((8+i*4)%8 + 4) <= 8 {
+			b[m+(8+i*4)/8] ^= byte(uint16(s.C2[i]&(15))) << ((8+i*4)%8 + 0)
+		} else {
+			tmp := uint16(s.C2[i]&(15)) << ((8+i*4)%8 + 0)
+			b[m+(8+i*4)/8] ^= byte(tmp)
+			b[m+(16+i*4)/8] ^= byte(tmp >> 8)
+		}
+
+	}
+	// D uint4
+
+	if ((8+(int(s.A)*4))%8 + 4) <= 8 {
+		b[m+(8+(int(s.A)*4))/8] ^= byte(uint16(s.D&(15))) << ((8+(int(s.A)*4))%8 + 0)
+	} else {
+		tmp := uint16(s.D&(15)) << ((8+(int(s.A)*4))%8 + 0)
+		b[m+(8+(int(s.A)*4))/8] ^= byte(tmp)
+		b[m+(16+(int(s.A)*4))/8] ^= byte(tmp >> 8)
+	}
+
+	// E uint7
+
+	s.E = int(len(s.F))
+	if ((12+(int(s.A)*4))%8 + 7) <= 8 {
+		b[m+(12+(int(s.A)*4))/8] ^= byte(uint16(s.E&(127))) << ((12+(int(s.A)*4))%8 + 0)
+	} else {
+		tmp := uint16(s.E&(127)) << ((12+(int(s.A)*4))%8 + 0)
+		b[m+(12+(int(s.A)*4))/8] ^= byte(tmp)
+		b[m+(20+(int(s.A)*4))/8] ^= byte(tmp >> 8)
+	}
+
+	// F uint1
+
+	for i := 0; i < int(s.E); i++ {
+		if ((19+(int(s.A)*4)+i*1)%8 + 1) <= 8 {
+			b[m+(19+(int(s.A)*4)+i)/8] ^= byte(uint16(*(*uint8)(unsafe.Pointer(&s.F[i]))&1&(1))) << ((19+(int(s.A)*4)+i*1)%8 + 0)
+		} else {
+			tmp := uint16(*(*uint8)(unsafe.Pointer(&s.F[i]))&1&(1)) << ((19+(int(s.A)*4)+i*1)%8 + 0)
+			b[m+(19+(int(s.A)*4)+i)/8] ^= byte(tmp)
+			b[m+(27+(int(s.A)*4)+i)/8] ^= byte(tmp >> 8)
+		}
+
+	}
+	// G uint8
+	m += (19 + ((int(s.A) * 4) + int(s.E)*1)) / 8
+	if (19+((int(s.A)*4)+int(s.E)*1))%8 != 0 {
+		m++
+	}
+
+	b[(m + 0)] = uint8(s.G)
+	// H uint1
+
+	if 1 <= 8 {
+		b[(m + 1)] ^= byte(uint16(*(*uint8)(unsafe.Pointer(&s.H))&1&(1))) << 0
+	} else {
+		tmp := uint16(*(*uint8)(unsafe.Pointer(&s.H))&1&(1)) << 0
+		b[(m + 1)] ^= byte(tmp)
+		b[(m + 2)] ^= byte(tmp >> 8)
+	}
+
+	m += (9) / 8
+	if (9)%8 != 0 {
+		m++
+	}
+
+	return m
+}
+
+func (s *BitfieldExample) UnmarshalBinary(b []byte) int {
+	m := 0
+	// A uint4
+
+	if 4+m*8+4 > len(b)*8 {
+		return 0
+	}
+
+	s.A = int(func() uint16 {
+		tmp := uint16(b[(m + 0)])
+		if 4 > 8 {
+			tmp |= uint16(b[(m+1)]) << 8
+		}
+		return (tmp >> 0) & (15)
+	}())
+	// B uint4
+
+	s.B = int(func() uint16 {
+		tmp := uint16(b[(m + 0)])
+		if 8 > 8 {
+			tmp |= uint16(b[(m+1)]) << 8
+		}
+		return (tmp >> 4) & (15)
+	}())
+	// C2 uint4
+
+	if 12+(int(s.A)*4)+m*8+7 > len(b)*8 {
+		return 0
+	}
+
+	if len(s.C2) < int(s.A) {
+		s.C2 = make([]byte, int(s.A))
+	}
+	for i := 0; i < int(s.A); i++ {
+		s.C2[i] = byte(func() uint16 {
+			tmp := uint16(b[m+(8+i*4)/8])
+			if ((8+i*4)%8 + 4) > 8 {
+				tmp |= uint16(b[m+(16+i*4)/8]) << 8
+			}
+			return (tmp >> ((8+i*4)%8 + 0)) & (15)
+		}())
+	}
+	// D uint4
+
+	s.D = int(func() uint16 {
+		tmp := uint16(b[m+(8+(int(s.A)*4))/8])
+		if ((8+(int(s.A)*4))%8 + 4) > 8 {
+			tmp |= uint16(b[m+(16+(int(s.A)*4))/8]) << 8
+		}
+		return (tmp >> ((8+(int(s.A)*4))%8 + 0)) & (15)
+	}())
+	// E uint7
+
+	s.E = int(func() uint16 {
+		tmp := uint16(b[m+(12+(int(s.A)*4))/8])
+		if ((12+(int(s.A)*4))%8 + 7) > 8 {
+			tmp |= uint16(b[m+(20+(int(s.A)*4))/8]) << 8
+		}
+		return (tmp >> ((12+(int(s.A)*4))%8 + 0)) & (127)
+	}())
+	// F uint1
+
+	if 19+(int(s.A)*4)+m*8+int(s.E)*1 > len(b)*8 {
+		return 0
+	}
+
+	if len(s.F) < int(s.E) {
+		s.F = make([]bool, int(s.E))
+	}
+	for i := 0; i < int(s.E); i++ {
+		s.F[i] = uint8(func() uint16 {
+			tmp := uint16(b[m+(19+(int(s.A)*4)+i)/8])
+			if ((19+(int(s.A)*4)+i*1)%8 + 1) > 8 {
+				tmp |= uint16(b[m+(27+(int(s.A)*4)+i)/8]) << 8
+			}
+			return (tmp >> ((19+(int(s.A)*4)+i*1)%8 + 0)) & (1)
+		}()) > 0
+	}
+	// G uint8
+	m += (19 + ((int(s.A) * 4) + int(s.E)*1)) / 8
+	if (19+((int(s.A)*4)+int(s.E)*1))%8 != 0 {
+		m++
+	}
+	if 8+m*8+1 > len(b)*8 {
+		return 0
+	}
+
+	s.G = int(b[(m + 0)])
+	// H uint1
+
+	s.H = uint8(func() uint16 {
+		tmp := uint16(b[(m + 1)])
+		if 1 > 8 {
+			tmp |= uint16(b[(m+2)]) << 8
+		}
+		return (tmp >> 0) & (1)
+	}()) > 0
+	m += (9) / 8
+	if (9)%8 != 0 {
+		m++
+	}
+
+	return m
+}
+
+func (s *BitfieldExample) SizeOf() int {
+	m := 0
+	// A uint4
+
+	s.A = int(len(s.C2))
+
+	// B uint4
+
+	// C2 uint4
+
+	// D uint4
+
+	// E uint7
+
+	s.E = int(len(s.F))
+
+	// F uint1
+
+	// G uint8
+	m += (19 + ((int(s.A) * 4) + int(s.E)*1)) / 8
+	if (19+((int(s.A)*4)+int(s.E)*1))%8 != 0 {
+		m++
+	}
+
+	// H uint1
+
+	m += (9) / 8
+	if (9)%8 != 0 {
+		m++
+	}
+
+	return m
+}
+
+func (s *BitfieldExampleBench) UnmarshalBinary(b []byte) int {
+	m := 0
+	// V2 uint2
+
+	if 512+m*8+192 > len(b)*8 {
+		return 0
+	}
+
+	for i := 0; i < int(256); i++ {
+		s.V2[i] = uint(func() uint16 {
+			tmp := uint16(b[m+(0+i*2)/8])
+			if ((0+i*2)%8 + 2) > 8 {
+				tmp |= uint16(b[m+(8+i*2)/8]) << 8
+			}
+			return (tmp >> ((0+i*2)%8 + 0)) & (3)
+		}())
+	}
+	// V3 uint3
+
+	for i := 0; i < int(8); i++ {
+		for i1 := 0; i1 < int(8); i1++ {
+			s.V3[i][i1] = uint(func() uint16 {
+				tmp := uint16(b[m+(512+i*24+i1*3)/8])
+				if ((512+i1*3)%8 + 3) > 8 {
+					tmp |= uint16(b[m+(520+i*24+i1*3)/8]) << 8
+				}
+				return (tmp >> ((512+i1*3)%8 + 0)) & (7)
+			}())
+		}
+	}
+	m += (704) / 8
+	if (704)%8 != 0 {
+		m++
+	}
+
+	return m
+}
+
+func (s *BitfieldExampleBench) SizeOf() int {
+	m := 0
+	// V2 uint2
+
+	// V3 uint3
+
+	m += (704) / 8
+	if (704)%8 != 0 {
+		m++
+	}
+
+	return m
+}
+
 func (s *BitfieldExampleBench) MarshalBinary(b []byte) int {
 	if len(b) < s.SizeOf() {
 		return 0
 	}
 	m := 0
-	// V1
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.V1&(3))) << bitOff
-	} else {
-		tmp := uint16(s.V1&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
+	// V2 uint2
+
+	for i := 0; i < int(256); i++ {
+		if ((0+i*2)%8 + 2) <= 8 {
+			b[m+(0+i*2)/8] ^= byte(uint16(s.V2[i]&(3))) << ((0+i*2)%8 + 0)
+		} else {
+			tmp := uint16(s.V2[i]&(3)) << ((0+i*2)%8 + 0)
+			b[m+(0+i*2)/8] ^= byte(tmp)
+			b[m+(8+i*2)/8] ^= byte(tmp >> 8)
+		}
+
 	}
-	m += 2
-	// V2
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.V2&(3))) << bitOff
-	} else {
-		tmp := uint16(s.V2&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
+	// V3 uint3
+
+	for i := 0; i < int(8); i++ {
+		for i1 := 0; i1 < int(8); i1++ {
+			if ((512+i1*3)%8 + 3) <= 8 {
+				b[m+(512+i*24+i1*3)/8] ^= byte(uint16(s.V3[i][i1]&(7))) << ((512+i1*3)%8 + 0)
+			} else {
+				tmp := uint16(s.V3[i][i1]&(7)) << ((512+i1*3)%8 + 0)
+				b[m+(512+i*24+i1*3)/8] ^= byte(tmp)
+				b[m+(520+i*24+i1*3)/8] ^= byte(tmp >> 8)
+			}
+
+		}
 	}
-	m += 2
-	// V3
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.V3&(3))) << bitOff
-	} else {
-		tmp := uint16(s.V3&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// V4
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.V4&(3))) << bitOff
-	} else {
-		tmp := uint16(s.V4&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// V5
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.V5&(3))) << bitOff
-	} else {
-		tmp := uint16(s.V5&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// V6
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.V6&(3))) << bitOff
-	} else {
-		tmp := uint16(s.V6&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// V7
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.V7&(3))) << bitOff
-	} else {
-		tmp := uint16(s.V7&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// V8
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.V8&(3))) << bitOff
-	} else {
-		tmp := uint16(s.V8&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// AV1
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.AV1&(3))) << bitOff
-	} else {
-		tmp := uint16(s.AV1&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// AV2
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.AV2&(3))) << bitOff
-	} else {
-		tmp := uint16(s.AV2&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// AV3
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.AV3&(3))) << bitOff
-	} else {
-		tmp := uint16(s.AV3&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// AV4
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.AV4&(3))) << bitOff
-	} else {
-		tmp := uint16(s.AV4&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// AV5
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.AV5&(3))) << bitOff
-	} else {
-		tmp := uint16(s.AV5&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// AV6
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.AV6&(3))) << bitOff
-	} else {
-		tmp := uint16(s.AV6&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// AV7
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.AV7&(3))) << bitOff
-	} else {
-		tmp := uint16(s.AV7&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// AV8
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.AV8&(3))) << bitOff
-	} else {
-		tmp := uint16(s.AV8&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// BV1
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.BV1&(3))) << bitOff
-	} else {
-		tmp := uint16(s.BV1&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// BV2
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.BV2&(3))) << bitOff
-	} else {
-		tmp := uint16(s.BV2&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// BV3
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.BV3&(3))) << bitOff
-	} else {
-		tmp := uint16(s.BV3&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// BV4
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.BV4&(3))) << bitOff
-	} else {
-		tmp := uint16(s.BV4&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// BV5
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.BV5&(3))) << bitOff
-	} else {
-		tmp := uint16(s.BV5&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// BV6
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.BV6&(3))) << bitOff
-	} else {
-		tmp := uint16(s.BV6&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// BV7
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.BV7&(3))) << bitOff
-	} else {
-		tmp := uint16(s.BV7&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	// BV8
-	if byteOff, bitOff := m/8, m%8; bitOff+2 <= 8 {
-		b[byteOff] ^= byte(uint16(s.BV8&(3))) << bitOff
-	} else {
-		tmp := uint16(s.BV8&(3)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 2
-	if m%8 > 0 {
-		m += 8 - m%8
+	m += (704) / 8
+	if (704)%8 != 0 {
+		m++
 	}
 
-	return m / 8
-}
-
-func (s *BitfieldExampleBench) UnmarshalBinary(b []byte) int {
-	m := 0
-	// V1
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.V1 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// V2
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.V2 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// V3
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.V3 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// V4
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.V4 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// V5
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.V5 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// V6
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.V6 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// V7
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.V7 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// V8
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.V8 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// AV1
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.AV1 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// AV2
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.AV2 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// AV3
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.AV3 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// AV4
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.AV4 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// AV5
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.AV5 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// AV6
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.AV6 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// AV7
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.AV7 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// AV8
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.AV8 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// BV1
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.BV1 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// BV2
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.BV2 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// BV3
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.BV3 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// BV4
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.BV4 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// BV5
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.BV5 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// BV6
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.BV6 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// BV7
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.BV7 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	// BV8
-	if m+2 > len(b)*8 {
-		return m / 8
-	}
-	s.BV8 = byte(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+2 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (3)
-	}())
-	m += 2
-	if m%8 > 0 {
-		m += 8 - m%8
-	}
-
-	return m / 8
-}
-
-func (s *BitfieldExampleBench) SizeOf() int {
-	m := 0
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	m += 2
-	if m%8 > 0 {
-		m += 8 - m%8
-	}
-
-	return m / 8
-}
-
-func (s *ByteExampleBench) UnmarshalBinary(b []byte) int {
-	m := 0
-	// V1
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.V1 = byte(b[m/8])
-	m += 8
-	// V2
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.V2 = byte(b[m/8])
-	m += 8
-	// V3
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.V3 = byte(b[m/8])
-	m += 8
-	// V4
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.V4 = byte(b[m/8])
-	m += 8
-	// V5
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.V5 = byte(b[m/8])
-	m += 8
-	// V6
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.V6 = byte(b[m/8])
-	m += 8
-	// V7
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.V7 = byte(b[m/8])
-	m += 8
-	// V8
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.V8 = byte(b[m/8])
-	m += 8
-	// AV1
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.AV1 = byte(b[m/8])
-	m += 8
-	// AV2
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.AV2 = byte(b[m/8])
-	m += 8
-	// AV3
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.AV3 = byte(b[m/8])
-	m += 8
-	// AV4
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.AV4 = byte(b[m/8])
-	m += 8
-	// AV5
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.AV5 = byte(b[m/8])
-	m += 8
-	// AV6
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.AV6 = byte(b[m/8])
-	m += 8
-	// AV7
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.AV7 = byte(b[m/8])
-	m += 8
-	// AV8
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.AV8 = byte(b[m/8])
-	m += 8
-	// BV1
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.BV1 = byte(b[m/8])
-	m += 8
-	// BV2
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.BV2 = byte(b[m/8])
-	m += 8
-	// BV3
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.BV3 = byte(b[m/8])
-	m += 8
-	// BV4
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.BV4 = byte(b[m/8])
-	m += 8
-	// BV5
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.BV5 = byte(b[m/8])
-	m += 8
-	// BV6
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.BV6 = byte(b[m/8])
-	m += 8
-	// BV7
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.BV7 = byte(b[m/8])
-	m += 8
-	// BV8
-	if m+8 > len(b)*8 {
-		return m / 8
-	}
-	s.BV8 = byte(b[m/8])
-	m += 8
-	return m / 8
-}
-
-func (s *ByteExampleBench) SizeOf() int {
-	m := 0
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	m += 8
-	return m / 8
+	return m
 }
 
 func (s *ByteExampleBench) MarshalBinary(b []byte) int {
@@ -768,253 +334,62 @@ func (s *ByteExampleBench) MarshalBinary(b []byte) int {
 		return 0
 	}
 	m := 0
-	// V1
-	b[m/8] = uint8(s.V1)
-	m += 8
-	// V2
-	b[m/8] = uint8(s.V2)
-	m += 8
-	// V3
-	b[m/8] = uint8(s.V3)
-	m += 8
-	// V4
-	b[m/8] = uint8(s.V4)
-	m += 8
-	// V5
-	b[m/8] = uint8(s.V5)
-	m += 8
-	// V6
-	b[m/8] = uint8(s.V6)
-	m += 8
-	// V7
-	b[m/8] = uint8(s.V7)
-	m += 8
-	// V8
-	b[m/8] = uint8(s.V8)
-	m += 8
-	// AV1
-	b[m/8] = uint8(s.AV1)
-	m += 8
-	// AV2
-	b[m/8] = uint8(s.AV2)
-	m += 8
-	// AV3
-	b[m/8] = uint8(s.AV3)
-	m += 8
-	// AV4
-	b[m/8] = uint8(s.AV4)
-	m += 8
-	// AV5
-	b[m/8] = uint8(s.AV5)
-	m += 8
-	// AV6
-	b[m/8] = uint8(s.AV6)
-	m += 8
-	// AV7
-	b[m/8] = uint8(s.AV7)
-	m += 8
-	// AV8
-	b[m/8] = uint8(s.AV8)
-	m += 8
-	// BV1
-	b[m/8] = uint8(s.BV1)
-	m += 8
-	// BV2
-	b[m/8] = uint8(s.BV2)
-	m += 8
-	// BV3
-	b[m/8] = uint8(s.BV3)
-	m += 8
-	// BV4
-	b[m/8] = uint8(s.BV4)
-	m += 8
-	// BV5
-	b[m/8] = uint8(s.BV5)
-	m += 8
-	// BV6
-	b[m/8] = uint8(s.BV6)
-	m += 8
-	// BV7
-	b[m/8] = uint8(s.BV7)
-	m += 8
-	// BV8
-	b[m/8] = uint8(s.BV8)
-	m += 8
-	return m / 8
+	// V1 uint8
+
+	for i := 0; i < int(256); i++ {
+		b[(m + 0 + i)] = uint8(s.V1[i])
+	}
+	// V2 uint8
+
+	for i := 0; i < int(8); i++ {
+		for i1 := 0; i1 < int(8); i1++ {
+			b[(m + 256 + i*8 + i1)] = uint8(s.V2[i][i1])
+		}
+	}
+	m += (2560) / 8
+	if (2560)%8 != 0 {
+		m++
+	}
+
+	return m
 }
 
-func (s *BitfieldExample) MarshalBinary(b []byte) int {
-	if len(b) < s.SizeOf() {
+func (s *ByteExampleBench) UnmarshalBinary(b []byte) int {
+	m := 0
+	// V1 uint8
+
+	if 2048+m*8+512 > len(b)*8 {
 		return 0
 	}
-	m := 0
-	// A
-	if byteOff, bitOff := m/8, m%8; bitOff+4 <= 8 {
-		b[byteOff] ^= byte(uint16(s.A&(15))) << bitOff
-	} else {
-		tmp := uint16(s.A&(15)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
+
+	for i := 0; i < int(256); i++ {
+		s.V1[i] = uint(b[(m + 0 + i)])
 	}
-	m += 4
-	// B
-	if byteOff, bitOff := m/8, m%8; bitOff+3 <= 8 {
-		b[byteOff] ^= byte(uint16(s.B&(7))) << bitOff
-	} else {
-		tmp := uint16(s.B&(7)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 3
-	if m%8 > 0 {
-		m += 8 - m%8
-	}
-	// C2
-	for i := 0; i < int(2); i++ {
-		b[m/8] = uint8(s.C2[i])
-		m += 8
-	}
-	// D
-	if byteOff, bitOff := m/8, m%8; bitOff+4 <= 8 {
-		b[byteOff] ^= byte(uint16(s.D&(15))) << bitOff
-	} else {
-		tmp := uint16(s.D&(15)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 4
-	// E
-	if byteOff, bitOff := m/8, m%8; bitOff+7 <= 8 {
-		b[byteOff] ^= byte(uint16(s.E&(127))) << bitOff
-	} else {
-		tmp := uint16(s.E&(127)) << bitOff
-		b[byteOff] ^= byte(tmp)
-		b[byteOff+1] ^= byte(tmp >> 8)
-	}
-	m += 7
-	// F
-	for i := 0; i < int(2); i++ {
-		if byteOff, bitOff := m/8, m%8; bitOff+1 <= 8 {
-			b[byteOff] ^= byte(uint16(*(*uint8)(unsafe.Pointer(&s.F[i]))&1&(1))) << bitOff
-		} else {
-			tmp := uint16(*(*uint8)(unsafe.Pointer(&s.F[i]))&1&(1)) << bitOff
-			b[byteOff] ^= byte(tmp)
-			b[byteOff+1] ^= byte(tmp >> 8)
+	// V2 uint8
+
+	for i := 0; i < int(8); i++ {
+		for i1 := 0; i1 < int(8); i1++ {
+			s.V2[i][i1] = uint(b[(m + 256 + i*8 + i1)])
 		}
-		m += 1
 	}
-	if m%8 > 0 {
-		m += 8 - m%8
+	m += (2560) / 8
+	if (2560)%8 != 0 {
+		m++
 	}
 
-	return m / 8
+	return m
 }
 
-func (s *BitfieldExample) UnmarshalBinary(b []byte) int {
+func (s *ByteExampleBench) SizeOf() int {
 	m := 0
-	// A
-	if m+4 > len(b)*8 {
-		return m / 8
-	}
-	s.A = int(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+4 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (15)
-	}())
-	m += 4
-	// B
-	if m+3 > len(b)*8 {
-		return m / 8
-	}
-	s.B = int(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+3 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (7)
-	}())
-	m += 3
-	if m%8 > 0 {
-		m += 8 - m%8
-	}
-	// C2
-	for i := 0; i < int(2); i++ {
-		if m+8 > len(b)*8 {
-			return m / 8
-		}
-		s.C2[i] = byte(b[m/8])
-		m += 8
-	}
-	// D
-	if m+4 > len(b)*8 {
-		return m / 8
-	}
-	s.D = int(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+4 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (15)
-	}())
-	m += 4
-	// E
-	if m+7 > len(b)*8 {
-		return m / 8
-	}
-	s.E = int(func() uint16 {
-		byteOff, bitOff := m/8, m%8
-		tmp := uint16(b[byteOff])
-		if bitOff+7 > 8 {
-			tmp |= uint16(b[byteOff+1]) << 8
-		}
-		return (tmp >> bitOff) & (127)
-	}())
-	m += 7
-	// F
-	for i := 0; i < int(2); i++ {
-		if m+1 > len(b)*8 {
-			return m / 8
-		}
-		s.F[i] = uint8(func() uint16 {
-			byteOff, bitOff := m/8, m%8
-			tmp := uint16(b[byteOff])
-			if bitOff+1 > 8 {
-				tmp |= uint16(b[byteOff+1]) << 8
-			}
-			return (tmp >> bitOff) & (1)
-		}()) > 0
-		m += 1
-	}
-	if m%8 > 0 {
-		m += 8 - m%8
+	// V1 uint8
+
+	// V2 uint8
+
+	m += (2560) / 8
+	if (2560)%8 != 0 {
+		m++
 	}
 
-	return m / 8
-}
-
-func (s *BitfieldExample) SizeOf() int {
-	m := 0
-	m += 4
-	m += 3
-	if m%8 > 0 {
-		m += 8 - m%8
-	}
-	for i := 0; i < int(2); i++ {
-		m += 8
-	}
-	m += 4
-	m += 7
-	for i := 0; i < int(2); i++ {
-		m += 1
-	}
-	if m%8 > 0 {
-		m += 8 - m%8
-	}
-
-	return m / 8
+	return m
 }

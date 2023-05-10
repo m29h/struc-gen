@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 )
 
-//go:generate struc-gen
+//go:generate go run github.com/m29h/struc-gen/cmd/struc-gen
 
 // Custom Type
 type Int3 uint32
