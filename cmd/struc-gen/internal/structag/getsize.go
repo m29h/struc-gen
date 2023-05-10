@@ -19,6 +19,6 @@ func (tag *StrucTag) GetSize() (*jen.Statement, error) {
 		j = RootStructName().Dot(tag.field.Name()).Op("=").Id(targetType).Call(jen.Len(RootStructName().Dot(tag.sizeof))).Line().Add(j)
 	}
 	tag.loopvars = nil
-	return j, err
+	return tag.render(j), err
 
 }

@@ -11,59 +11,41 @@ import (
 type MethodBuilder struct {
 	structType     *types.Struct
 	sourceTypeName string
-	lastWasBit     bool
-}
-
-// checks the mb local variable and introduces necessary code to byte align the next statement
-func (m *MethodBuilder) byteAlign() *jen.Statement {
-	st := jen.If(jen.Id("m").Op("%").Lit(8).Op(">").Lit(0)).Block(jen.Id("m").Op("+=").Lit(8).Op("-").Id("m").Op("%").Lit(8)).Line()
-	return st
 }
 
 func NewMethodBuilder(TypeName string, Type *types.Struct) *MethodBuilder {
 	return &MethodBuilder{
 		structType:     Type,
 		sourceTypeName: TypeName,
-		lastWasBit:     false,
 	}
 }
 
 func (m *MethodBuilder) MakeMethodCode(gen structag.TagPrompter) ([]jen.Code, error) {
 	var funcBlock []jen.Code
-	anyBitFields := false
 
 	funcBlock = append(funcBlock, jen.Id("m").Op(":=").Lit(0))
 
+	ctx := &structag.Context{}
+
 	for i := 0; i < m.structType.NumFields(); i++ {
 
-		tag := structag.NewStrucTag(m.structType.Field(i), m.structType.Tag(i))
+		tag, err := structag.NewStrucTag(ctx, m.structType.Field(i), m.structType.Tag(i))
+		if err != nil {
+			return nil, fmt.Errorf("unable to serialize Field %s: %w", m.structType.Field(i), err)
+		}
+
 		// Generate code for each changeset field
 		p, err := gen(tag)
 		if err != nil {
 			return nil, fmt.Errorf("unable to serialize Field %s: %w", m.structType.Field(i), err)
 		}
-		if tag.GetBitLen() < 8 {
-			anyBitFields = true
-			m.lastWasBit = true
-		} else {
-			if m.lastWasBit {
-				// prepend byte align statement
-				// to make sure that the tag is written to the next free byte aligned position
-				p = m.byteAlign().Add(p.Clone())
-			}
-			m.lastWasBit = false
-		}
 		funcBlock = append(funcBlock, p)
 
 	}
-	if anyBitFields {
-		//prepend the mb variable definition
-		//funcBlock = append([]jen.Code{jen.Id("mb").Op(":=").Lit(0)}, funcBlock...)
-		//append byteAlign statement to make sure the m variable is up to date before returning
-		funcBlock = append(funcBlock, m.byteAlign())
-	}
-	// 4. Build return statement
-	funcBlock = append(funcBlock, jen.Return(jen.Id("m").Op("/").Lit(8)))
+
+	// flush the remaining context into "m" and return the value
+
+	funcBlock = append(funcBlock, ctx.Flush(), jen.Return(jen.Id("m")))
 	return funcBlock, nil
 }
 

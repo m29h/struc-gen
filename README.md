@@ -81,14 +81,14 @@ goos: linux
 goarch: amd64
 pkg: github.com/m29h/struc-gen/testcase
 cpu: AMD Ryzen 9 3900X 12-Core Processor            
-BenchmarkMarshal__BitfieldArray-24              155300280                8.203 ns/op
-BenchmarkUnmarshal__BitfieldArray-24            123630304                9.529 ns/op
-BenchmarkMarshal__ByteArray-24                  178384686                6.814 ns/op
-BenchmarkUnmarshal__ByteArray-24                139100607                8.482 ns/op
-BenchmarkMarshal__strucgen-24                    9355186               131.7 ns/op
-BenchmarkUnmarshal__strucgen-24                  3656922               352.7 ns/op
-BenchmarkMarshal__lunixbochs_struc-24             425276              5136 ns/op
-BenchmarkUnmarshal__lunixbochs_struc-24           241210              5091 ns/op
+BenchmarkMarshal__BitfieldArray-24               2092998               576.8 ns/op
+BenchmarkUnmarshal__BitfieldArray-24             2074000               558.1 ns/op
+BenchmarkMarshal__ByteArray-24                   8339070               148.9 ns/op
+BenchmarkUnmarshal__ByteArray-24                 6079618               175.1 ns/op
+BenchmarkMarshal__strucgen-24                   10114875               114.4 ns/op
+BenchmarkUnmarshal__strucgen-24                  3848166               302.3 ns/op
+BenchmarkMarshal__lunixbochs_struc-24             225576              5307 ns/op
+BenchmarkUnmarshal__lunixbochs_struc-24           252816              4725 ns/op
 PASS
-ok      github.com/m29h/struc-gen/testcase      15.439s
+ok      github.com/m29h/struc-gen/testcase      13.429s
 ```
