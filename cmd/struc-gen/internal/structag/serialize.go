@@ -26,7 +26,7 @@ func (tag *StrucTag) Pack() (*jen.Statement, error) {
 }
 
 func (tag *StrucTag) TypeToBinary(goType string, n *jen.Statement) *jen.Statement {
-	switch goType { //wrap incoming gotype or treat seperately if necessary
+	switch goType { //wrap incoming gotype or treat separately if necessary
 	case "bool":
 		//convert the bool to an uint8
 		//uint8(*(*uint8)(unsafe.Pointer(&s.BoolT)) & 1 & 1)
