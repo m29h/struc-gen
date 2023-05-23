@@ -1,4 +1,4 @@
-[![Tests](https://github.com/m29h/struc-gen/actions/workflows/push.yml/badge.svg)](https://github.com/m29h/struc-gen/actions/workflows/push.yml) [![Coverage Status](https://coveralls.io/repos/github/m29h/struc-gen/badge.svg)](https://coveralls.io/github/m29h/struc-gen)
+[![Tests](https://github.com/m29h/struc-gen/actions/workflows/test.yml/badge.svg)](https://github.com/m29h/struc-gen/actions/workflows/test.yml) [![Coverage Status](https://coveralls.io/repos/github/m29h/struc-gen/badge.svg)](https://coveralls.io/github/m29h/struc-gen)
 
 
 # struc-gen
