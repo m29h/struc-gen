@@ -1,7 +1,5 @@
-[![Tests](https://github.com/m29h/struc-gen/actions/workflows/test.yml/badge.svg)](https://github.com/m29h/struc-gen/actions/workflows/test.yml) [![Coverage Status](https://coveralls.io/repos/github/m29h/struc-gen/badge.svg)](https://coveralls.io/github/m29h/struc-gen)
+# struc-gen [![GoDoc](https://godoc.org/github.com/m29h/struc-gen?status.svg)](https://godoc.org/github.com/m29h/struc-gen) [![Tests](https://github.com/m29h/struc-gen/actions/workflows/test.yml/badge.svg)](https://github.com/m29h/struc-gen/actions/workflows/test.yml) [![Coverage Status](https://coveralls.io/repos/github/m29h/struc-gen/badge.svg)](https://coveralls.io/github/m29h/struc-gen) [![Go Report Card](https://goreportcard.com/badge/github.com/m29h/struc-gen)](https://goreportcard.com/report/github.com/m29h/struc-gen)
 
-
-# struc-gen
 Struc-gen is a code generator for Go that generates methods for binary struct Marshaling and Unmarshaling. The behaviour can be configured by adding struct tags. The configuration options are heavily inspired and substantially compatible with those used by [`lunixbochs/struc`](https://github.com/lunixbochs/struc)
 
 The code supports most basic Go types as well as bitfield types 1 to 7 bit; bitfield types get "tightly packed" on a bit level.
