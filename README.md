@@ -1,4 +1,5 @@
-[![Tests](https://github.com/m29h/struc-gen/actions/workflows/push.yml/badge.svg)](https://github.com/m29h/struc-gen/actions/workflows/push.yml)
+[![Tests](https://github.com/m29h/struc-gen/actions/workflows/push.yml/badge.svg)](https://github.com/m29h/struc-gen/actions/workflows/push.yml) [![Coverage Status](https://coveralls.io/repos/github/m29h/struc-gen/badge.svg)](https://coveralls.io/github/m29h/struc-gen)
+
 
 # struc-gen
 Struc-gen is a code generator for Go that generates methods for binary struct Marshaling and Unmarshaling. The behaviour can be configured by adding struct tags. The configuration options are heavily inspired and substantially compatible with those used by [`lunixbochs/struc`](https://github.com/lunixbochs/struc)
