@@ -37,7 +37,7 @@ func (tag *StrucTag) BinaryToType(goType string, n *jen.Statement) *jen.Statemen
 		*(tag.context.checkBound) = *(jen.If(tag.bitPosStart().Op("+").Add(tag.fieldLenStatement(false)).Op(">").Len(jen.Id("b")).Op("*").Lit(8)).Block(jen.Return(jen.Lit(0))).Line())
 	}
 
-	switch goType { //wrap incoming gotype or treat seperately if necessary
+	switch goType { //wrap incoming gotype or treat separately if necessary
 	case "bool":
 		return tag.genBinToTypeStatement("uint8", tag.Type, jen.Op(">").Lit(0), n)
 	case "string":
