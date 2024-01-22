@@ -3,6 +3,162 @@ package test
 
 import "unsafe"
 
+func (s *BitfieldExampleBench) MarshalBinary(b []byte) int {
+	if len(b) < s.SizeOf() {
+		return 0
+	}
+	m := 0
+	// V2 uint2
+
+	for i := 0; i < int(256); i++ {
+		if ((0+i*2)%8 + 2) <= 8 {
+			b[m+(0+i*2)/8] ^= byte(uint16(s.V2[i]&(3))) << ((0+i*2)%8 + 0)
+		} else {
+			tmp := uint16(s.V2[i]&(3)) << ((0+i*2)%8 + 0)
+			b[m+(0+i*2)/8] ^= byte(tmp)
+			b[m+(8+i*2)/8] ^= byte(tmp >> 8)
+		}
+
+	}
+	// V3 uint3
+
+	for i := 0; i < int(8); i++ {
+		for i1 := 0; i1 < int(8); i1++ {
+			if ((512+i1*3)%8 + 3) <= 8 {
+				b[m+(512+i*24+i1*3)/8] ^= byte(uint16(s.V3[i][i1]&(7))) << ((512+i1*3)%8 + 0)
+			} else {
+				tmp := uint16(s.V3[i][i1]&(7)) << ((512+i1*3)%8 + 0)
+				b[m+(512+i*24+i1*3)/8] ^= byte(tmp)
+				b[m+(520+i*24+i1*3)/8] ^= byte(tmp >> 8)
+			}
+
+		}
+	}
+	m += (704) / 8
+	if (704)%8 != 0 {
+		m++
+	}
+
+	return m
+}
+
+func (s *BitfieldExampleBench) UnmarshalBinary(b []byte) int {
+	m := 0
+	// V2 uint2
+
+	if 512+m*8+192 > len(b)*8 {
+		return 0
+	}
+
+	for i := 0; i < int(256); i++ {
+		s.V2[i] = uint(func() uint16 {
+			tmp := uint16(b[m+(0+i*2)/8])
+			if ((0+i*2)%8 + 2) > 8 {
+				tmp |= uint16(b[m+(8+i*2)/8]) << 8
+			}
+			return (tmp >> ((0+i*2)%8 + 0)) & (3)
+		}())
+	}
+	// V3 uint3
+
+	for i := 0; i < int(8); i++ {
+		for i1 := 0; i1 < int(8); i1++ {
+			s.V3[i][i1] = uint(func() uint16 {
+				tmp := uint16(b[m+(512+i*24+i1*3)/8])
+				if ((512+i1*3)%8 + 3) > 8 {
+					tmp |= uint16(b[m+(520+i*24+i1*3)/8]) << 8
+				}
+				return (tmp >> ((512+i1*3)%8 + 0)) & (7)
+			}())
+		}
+	}
+	m += (704) / 8
+	if (704)%8 != 0 {
+		m++
+	}
+
+	return m
+}
+
+func (s *BitfieldExampleBench) SizeOf() int {
+	m := 0
+	// V2 uint2
+
+	// V3 uint3
+
+	m += (704) / 8
+	if (704)%8 != 0 {
+		m++
+	}
+
+	return m
+}
+
+func (s *ByteExampleBench) MarshalBinary(b []byte) int {
+	if len(b) < s.SizeOf() {
+		return 0
+	}
+	m := 0
+	// V1 uint8
+
+	for i := 0; i < int(256); i++ {
+		b[(m + 0 + i)] = uint8(s.V1[i])
+	}
+	// V2 uint8
+
+	for i := 0; i < int(8); i++ {
+		for i1 := 0; i1 < int(8); i1++ {
+			b[(m + 256 + i*8 + i1)] = uint8(s.V2[i][i1])
+		}
+	}
+	m += (2560) / 8
+	if (2560)%8 != 0 {
+		m++
+	}
+
+	return m
+}
+
+func (s *ByteExampleBench) UnmarshalBinary(b []byte) int {
+	m := 0
+	// V1 uint8
+
+	if 2048+m*8+512 > len(b)*8 {
+		return 0
+	}
+
+	for i := 0; i < int(256); i++ {
+		s.V1[i] = uint(b[(m + 0 + i)])
+	}
+	// V2 uint8
+
+	for i := 0; i < int(8); i++ {
+		for i1 := 0; i1 < int(8); i1++ {
+			s.V2[i][i1] = uint(b[(m + 256 + i*8 + i1)])
+		}
+	}
+	m += (2560) / 8
+	if (2560)%8 != 0 {
+		m++
+	}
+
+	return m
+}
+
+func (s *ByteExampleBench) SizeOf() int {
+	m := 0
+	// V1 uint8
+
+	// V2 uint8
+
+	m += (2560) / 8
+	if (2560)%8 != 0 {
+		m++
+	}
+
+	return m
+}
+
 func (s *BitfieldExample) MarshalBinary(b []byte) int {
 	if len(b) < s.SizeOf() {
 		return 0
@@ -232,162 +388,6 @@ func (s *BitfieldExample) SizeOf() int {
 
 	m += (9) / 8
 	if (9)%8 != 0 {
-		m++
-	}
-
-	return m
-}
-
-func (s *BitfieldExampleBench) UnmarshalBinary(b []byte) int {
-	m := 0
-	// V2 uint2
-
-	if 512+m*8+192 > len(b)*8 {
-		return 0
-	}
-
-	for i := 0; i < int(256); i++ {
-		s.V2[i] = uint(func() uint16 {
-			tmp := uint16(b[m+(0+i*2)/8])
-			if ((0+i*2)%8 + 2) > 8 {
-				tmp |= uint16(b[m+(8+i*2)/8]) << 8
-			}
-			return (tmp >> ((0+i*2)%8 + 0)) & (3)
-		}())
-	}
-	// V3 uint3
-
-	for i := 0; i < int(8); i++ {
-		for i1 := 0; i1 < int(8); i1++ {
-			s.V3[i][i1] = uint(func() uint16 {
-				tmp := uint16(b[m+(512+i*24+i1*3)/8])
-				if ((512+i1*3)%8 + 3) > 8 {
-					tmp |= uint16(b[m+(520+i*24+i1*3)/8]) << 8
-				}
-				return (tmp >> ((512+i1*3)%8 + 0)) & (7)
-			}())
-		}
-	}
-	m += (704) / 8
-	if (704)%8 != 0 {
-		m++
-	}
-
-	return m
-}
-
-func (s *BitfieldExampleBench) SizeOf() int {
-	m := 0
-	// V2 uint2
-
-	// V3 uint3
-
-	m += (704) / 8
-	if (704)%8 != 0 {
-		m++
-	}
-
-	return m
-}
-
-func (s *BitfieldExampleBench) MarshalBinary(b []byte) int {
-	if len(b) < s.SizeOf() {
-		return 0
-	}
-	m := 0
-	// V2 uint2
-
-	for i := 0; i < int(256); i++ {
-		if ((0+i*2)%8 + 2) <= 8 {
-			b[m+(0+i*2)/8] ^= byte(uint16(s.V2[i]&(3))) << ((0+i*2)%8 + 0)
-		} else {
-			tmp := uint16(s.V2[i]&(3)) << ((0+i*2)%8 + 0)
-			b[m+(0+i*2)/8] ^= byte(tmp)
-			b[m+(8+i*2)/8] ^= byte(tmp >> 8)
-		}
-
-	}
-	// V3 uint3
-
-	for i := 0; i < int(8); i++ {
-		for i1 := 0; i1 < int(8); i1++ {
-			if ((512+i1*3)%8 + 3) <= 8 {
-				b[m+(512+i*24+i1*3)/8] ^= byte(uint16(s.V3[i][i1]&(7))) << ((512+i1*3)%8 + 0)
-			} else {
-				tmp := uint16(s.V3[i][i1]&(7)) << ((512+i1*3)%8 + 0)
-				b[m+(512+i*24+i1*3)/8] ^= byte(tmp)
-				b[m+(520+i*24+i1*3)/8] ^= byte(tmp >> 8)
-			}
-
-		}
-	}
-	m += (704) / 8
-	if (704)%8 != 0 {
-		m++
-	}
-
-	return m
-}
-
-func (s *ByteExampleBench) MarshalBinary(b []byte) int {
-	if len(b) < s.SizeOf() {
-		return 0
-	}
-	m := 0
-	// V1 uint8
-
-	for i := 0; i < int(256); i++ {
-		b[(m + 0 + i)] = uint8(s.V1[i])
-	}
-	// V2 uint8
-
-	for i := 0; i < int(8); i++ {
-		for i1 := 0; i1 < int(8); i1++ {
-			b[(m + 256 + i*8 + i1)] = uint8(s.V2[i][i1])
-		}
-	}
-	m += (2560) / 8
-	if (2560)%8 != 0 {
-		m++
-	}
-
-	return m
-}
-
-func (s *ByteExampleBench) UnmarshalBinary(b []byte) int {
-	m := 0
-	// V1 uint8
-
-	if 2048+m*8+512 > len(b)*8 {
-		return 0
-	}
-
-	for i := 0; i < int(256); i++ {
-		s.V1[i] = uint(b[(m + 0 + i)])
-	}
-	// V2 uint8
-
-	for i := 0; i < int(8); i++ {
-		for i1 := 0; i1 < int(8); i1++ {
-			s.V2[i][i1] = uint(b[(m + 256 + i*8 + i1)])
-		}
-	}
-	m += (2560) / 8
-	if (2560)%8 != 0 {
-		m++
-	}
-
-	return m
-}
-
-func (s *ByteExampleBench) SizeOf() int {
-	m := 0
-	// V1 uint8
-
-	// V2 uint8
-
-	m += (2560) / 8
-	if (2560)%8 != 0 {
 		m++
 	}
 
