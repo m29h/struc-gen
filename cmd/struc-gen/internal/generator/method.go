@@ -1,6 +1,7 @@
 package generator
 
 import (
+	"encoding/binary"
 	"fmt"
 	"go/types"
 
@@ -9,14 +10,16 @@ import (
 )
 
 type MethodBuilder struct {
-	structType     *types.Struct
-	sourceTypeName string
+	structType       *types.Struct
+	sourceTypeName   string
+	defaultByteorder binary.ByteOrder
 }
 
-func NewMethodBuilder(TypeName string, Type *types.Struct) *MethodBuilder {
+func NewMethodBuilder(TypeName string, Type *types.Struct, defaultByteorder binary.ByteOrder) *MethodBuilder {
 	return &MethodBuilder{
-		structType:     Type,
-		sourceTypeName: TypeName,
+		structType:       Type,
+		sourceTypeName:   TypeName,
+		defaultByteorder: defaultByteorder,
 	}
 }
 
@@ -29,7 +32,7 @@ func (m *MethodBuilder) MakeMethodCode(gen structag.TagPrompter) ([]jen.Code, er
 
 	for i := 0; i < m.structType.NumFields(); i++ {
 
-		tag, err := structag.NewStrucTag(ctx, m.structType.Field(i), m.structType.Tag(i))
+		tag, err := structag.NewStrucTag(ctx, m.structType.Field(i), m.structType.Tag(i), m.defaultByteorder)
 		if err != nil {
 			return nil, fmt.Errorf("unable to serialize Field %s: %w", m.structType.Field(i), err)
 		}

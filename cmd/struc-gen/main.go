@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"flag"
 	"fmt"
 	"go/types"
@@ -13,6 +14,8 @@ import (
 	"github.com/m29h/struc-gen/cmd/struc-gen/internal/generator"
 	"golang.org/x/tools/go/packages"
 )
+
+var little = flag.Bool("little", false, "set default byteorder to littleandian")
 
 func main() {
 
@@ -85,7 +88,11 @@ func generate(pkg *packages.Package, t map[string]*types.Struct) error {
 	// Collect Function block serializing whole struct
 	for sourceTypeName, structType := range t {
 		fmt.Printf("->%s\n", sourceTypeName)
-		mb := generator.NewMethodBuilder(sourceTypeName, structType)
+		defaultByteorder := binary.ByteOrder(binary.BigEndian)
+		if *little {
+			defaultByteorder = binary.LittleEndian
+		}
+		mb := generator.NewMethodBuilder(sourceTypeName, structType, defaultByteorder)
 		f.Add(mb.MakeMethods())
 	}
 
