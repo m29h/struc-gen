@@ -295,10 +295,10 @@ func init() {
 func RootStructName() *jen.Statement {
 	return jen.Id("s")
 }
-func NewStrucTag(ctx *Context, fieldVal *types.Var, tagVal string) (*StrucTag, error) {
+func NewStrucTag(ctx *Context, fieldVal *types.Var, tagVal string, defaultByteorder binary.ByteOrder) (*StrucTag, error) {
 	t := &StrucTag{
 		field: fieldVal,
-		Order: binary.BigEndian,
+		Order: defaultByteorder,
 	}
 	tag := reflect.StructTag(tagVal)
 	tagStr := tag.Get("struc")
