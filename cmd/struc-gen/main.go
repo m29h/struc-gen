@@ -15,7 +15,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-var little = flag.Bool("little", false, "set default byteorder to littleandian")
+var little = flag.Bool("little", false, "set default byteorder to little-endian")
 
 func main() {
 
